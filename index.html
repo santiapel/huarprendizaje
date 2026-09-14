@@ -3,9 +3,19 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Huarprendizaje</title>
-    <link rel="icon" type="image/png" href="https://i.ibb.co/fV7Qvcxd/Gemini-Generated-Image-w18861w18861w188-removebg-preview.png">
+<title>Huarprendizaje: Guardianes de Cuyo</title>
 <meta name="description" content="Huarprendizaje es una aventura educativa interactiva sobre la cultura Huarpe, Cuyo y el cuidado del agua, con lecciones generadas por IA, videollamaras, minijuegos, mascotas y desafíos interactivos.">
+<link rel="icon" type="image/png" href="https://i.ibb.co/fV7Qvcxd/Gemini-Generated-Image-w18861w18861w188-removebg-preview.png">
+<link rel="apple-touch-icon" href="https://i.ibb.co/fV7Qvcxd/Gemini-Generated-Image-w18861w18861w188-removebg-preview.png">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://santiapel.github.io/huarprendizaje/">
+<meta property="og:title" content="Huarprendizaje: Guardianes de Cuyo">
+<meta property="og:description" content="Una aventura educativa interactiva sobre la cultura Huarpe, Cuyo y el cuidado del agua, con lecciones de IA, videollamadas, minijuegos y mascotas.">
+<meta property="og:image" content="https://i.ibb.co/Jhg3ZYj/Whats-App-Image-2026-09-04-at-4-26-50-PM-removebg-preview.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Huarprendizaje: Guardianes de Cuyo">
+<meta name="twitter:description" content="Una aventura educativa interactiva sobre la cultura Huarpe, Cuyo y el cuidado del agua, con lecciones de IA, videollamadas, minijuegos y mascotas.">
+<meta name="twitter:image" content="https://i.ibb.co/Jhg3ZYj/Whats-App-Image-2026-09-04-at-4-26-50-PM-removebg-preview.png">
 <script src="https://cdn.tailwindcss.com">
 
 pruneOldInfiniteLessons(30);
@@ -524,7 +534,7 @@ pruneOldInfiniteLessons(30);
     <!-- Panel de retroalimentación inferior -->
     <div id="lesson-feedback-panel" class="hidden px-5 py-4 border-t-2">
       <div class="flex items-center gap-3 mb-3">
-        <span id="feedback-icon" class="text-3xl"></span>
+        <span id="feedback-icon" class="w-8 h-8 flex-shrink-0"></span>
         <div>
           <p id="feedback-title" class="font-extrabold font-display text-lg"></p>
           <p id="feedback-explain" class="text-sm text-[var(--brown)]"></p>
@@ -637,10 +647,10 @@ pruneOldInfiniteLessons(30);
   <section id="screen-game" class="screen flex-col w-full min-h-screen bg-gradient-to-b from-[#F3E3B8] to-[var(--sand)]">
     <header class="px-4 pt-4 pb-2 flex items-center justify-between">
       <button id="btn-exit-game" class="w-6 h-6 text-[var(--brown)] icon-close"></button>
-      <h2 class="font-extrabold font-display text-[var(--brown-dark)]">Carrera del Guanaco 🦙</h2>
+      <h2 id="game-screen-title" class="font-extrabold font-display text-[var(--brown-dark)]">Carrera del Guanaco 🦙</h2>
       <div class="w-6"></div>
     </header>
-    <p class="text-center text-xs text-[var(--brown)] px-6 -mt-1 mb-1">Tocá la pantalla para saltar los cactus</p>
+    <p id="game-screen-subtitle" class="text-center text-xs text-[var(--brown)] px-6 -mt-1 mb-1">Tocá la pantalla para saltar los cactus</p>
 
     <div id="game-area" class="relative flex-1 mx-4 mb-4 rounded-3xl overflow-hidden border-4 border-[var(--brown)]/30 bg-[#FBF3DD] cursor-pointer select-none">
       <div class="game-sun-glow"></div>
@@ -739,6 +749,25 @@ const ICONS = {
   lock: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="100%" height="100%"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>',
   check: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" width="100%" height="100%"><path d="M4 12l5 5L20 6"/></svg>',
   infinity: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="100%" height="100%"><path d="M6 9a3 3 0 1 0 0 6c2.5 0 4.5-2 6-4.5C13.5 8 15.5 6 18 6a3 3 0 1 1 0 6 3 3 0 0 1-2.4-1.2M6 9a3 3 0 0 1 2.4 1.2"/></svg>',
+  book: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="100%" height="100%"><path d="M4 4.5A2.5 2.5 0 0 1 6.5 2H12v18H6.5A2.5 2.5 0 0 0 4 22.5z"/><path d="M20 4.5A2.5 2.5 0 0 0 17.5 2H12v18h5.5a2.5 2.5 0 0 1 2.5 2.5z"/></svg>',
+  brain: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="100%" height="100%"><path d="M9 4a3 3 0 0 0-3 3 3 3 0 0 0-2 5 3 3 0 0 0 2 5 3 3 0 0 0 3 3h1V4z"/><path d="M15 4a3 3 0 0 1 3 3 3 3 0 0 1 2 5 3 3 0 0 1-2 5 3 3 0 0 1-3 3h-1V4z"/></svg>',
+  scale: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="100%" height="100%"><path d="M12 3v18M7 21h10M4 7h6M14 7h6M4 7l-2 5a3 3 0 0 0 6 0zM20 7l-2 5a3 3 0 0 0 6 0z"/></svg>',
+  pencil: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="100%" height="100%"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg>',
+  listNumber: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="100%" height="100%"><path d="M9 6h11M9 12h11M9 18h11"/><path d="M4 6h.01M4 12h.01M4 18h.01"/></svg>',
+  link: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="100%" height="100%"><path d="M9 15l6-6"/><path d="M13 5l1.5-1.5a4 4 0 1 1 5.7 5.7L19 10.5"/><path d="M11 19l-1.5 1.5a4 4 0 1 1-5.7-5.7L5 13.5"/></svg>',
+  checklist: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="100%" height="100%"><rect x="3" y="4" width="6" height="6" rx="1"/><path d="M5 7l1 1 2-2"/><rect x="3" y="14" width="6" height="6" rx="1"/><path d="M5 17l1 1 2-2"/><path d="M13 6h8M13 17h8"/></svg>',
+  puzzle: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="100%" height="100%"><path d="M9 3h4v2.5a1.5 1.5 0 0 0 3 0V3h4v4h-2.5a1.5 1.5 0 0 0 0 3H20v4h-4v-2.5a1.5 1.5 0 0 0-3 0V16H9v-4H6.5a1.5 1.5 0 0 1 0-3H9z"/></svg>',
+  bolt: '<svg viewBox="0 0 24 24" fill="currentColor" width="100%" height="100%"><path d="M13 2 3 14h7l-1 8 11-14h-7z"/></svg>',
+  phone: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="100%" height="100%"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1.9.3 1.8.6 2.7a2 2 0 0 1-.4 2.1L8 9.9a16 16 0 0 0 6 6l1.4-1.4a2 2 0 0 1 2.1-.4c.9.3 1.8.5 2.7.6a2 2 0 0 1 1.8 2.1z"/></svg>',
+  gamepad: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="100%" height="100%"><rect x="2" y="8" width="20" height="10" rx="5"/><path d="M7 11v4M5 13h4"/><circle cx="16" cy="11.5" r="1"/><circle cx="18.5" cy="14" r="1"/></svg>',
+  celebrate: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="100%" height="100%"><circle cx="12" cy="12" r="9"/><path d="M8 12.5l2.5 2.5L16 9.5"/></svg>',
+  lightbulb: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="100%" height="100%"><path d="M9 18h6M10 22h4"/><path d="M12 2a7 7 0 0 0-4 12.7c.6.5 1 1.2 1 2.3h6c0-1.1.4-1.8 1-2.3A7 7 0 0 0 12 2z"/></svg>',
+  flag: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="100%" height="100%"><path d="M5 21V4"/><path d="M5 4h14l-3 4 3 4H5"/></svg>',
+  drop: '<svg viewBox="0 0 24 24" fill="currentColor" width="100%" height="100%"><path d="M12 2s7 8.5 7 13a7 7 0 1 1-14 0c0-4.5 7-13 7-13z"/></svg>',
+  basket: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="100%" height="100%"><path d="M4 10h16l-1.5 9a2 2 0 0 1-2 1.7H7.5a2 2 0 0 1-2-1.7z"/><path d="M8 10 9 5M16 10l-1-5M4 10a8 8 0 0 1 16 0"/></svg>',
+  llama: '<svg viewBox="0 0 24 24" fill="currentColor" width="100%" height="100%"><path d="M9 22v-6c-2 0-3-1.5-3-3.5C6 9 7 7 7 5a3 3 0 0 1 6 0c0 1 .3 1.7.8 2.4.9 1.2 2.2 1.2 2.2 2.6 0 1-1 1.5-2 1.5v10h-2v-7h-1v7z"/></svg>',
+  pot: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="100%" height="100%"><path d="M8 3h8M9 3v3a5 5 0 0 0 0 2c-2 1-4 3-4 7a6 6 0 0 0 12 0c0-4-2-6-4-7a5 5 0 0 0 0-2V3"/></svg>',
+  wheat: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" width="100%" height="100%"><path d="M12 2v20"/><path d="M12 4l-3 2M12 4l3 2M12 8l-3 2M12 8l3 2M12 12l-3 2M12 12l3 2M12 16l-3 2M12 16l3 2"/></svg>',
 };
 
 function icon(name){ return ICONS[name] || ''; }
@@ -1186,23 +1215,121 @@ function aiQuestionFrom(base,type,index=0){
   return `${stem} ${base.q.replace(/^¿|\?$/g,'')}?`;
 }
 
+// Banco de contenido para las Lecciones de IA: cada tema trae varias
+// preguntas base [pregunta, opciones, índice correcto, explicación] que
+// luego se combinan con distintos formatos (cuento, misión, videollamada...).
+const AI_CONTENT_BANK = [
+  {
+    topic:'agua', title:'El agua y las acequias', icon:icon('drop'),
+    facts:[
+      ['¿Qué construían los Huarpes para llevar el agua del deshielo hasta los cultivos?', ['Acequias','Puentes de piedra','Torres de vigilancia','Barcos a vela'], 0, 'Las acequias eran canales que distribuían el agua de los ríos cordilleranos.'],
+      ['¿De qué montañas bajaba el agua que usaban para regar?', ['De la Cordillera de los Andes','Del mar Atlántico','De lagos artificiales','De pozos de petróleo'], 0, 'El deshielo andino alimentaba los ríos y acequias en la zona árida de Cuyo.'],
+      ['¿Por qué era tan importante cuidar el agua para los Huarpes?', ['Porque vivían en una región muy seca','Porque no sabían nadar','Porque el agua era solo para los jefes','Porque llovía todos los días'], 0, 'Cuyo es una zona desértica, así que el agua era un recurso escaso y vital.'],
+      ['¿Qué cultivos regaban gracias a las acequias?', ['Maíz, zapallo y quinoa','Café y cacao','Arroz de pantano','Trigo europeo'], 0, 'El sistema de riego permitió cultivar maíz, zapallo y quinoa en pleno desierto.'],
+      ['¿Qué comunidad heredó parte de ese sistema de riego?', ['Los mendocinos actuales, con las acequias de hoy','Los pueblos del Litoral','Los habitantes de la Patagonia','Nadie, se perdió por completo'], 0, 'Muchas acequias de Mendoza actual tienen origen en el sistema huarpe.']
+    ]
+  },
+  {
+    topic:'cesteria', title:'Cestería y totora', icon:icon('basket'),
+    facts:[
+      ['¿Con qué material tejían sus balsas y cestos?', ['Junco y totora','Lana de oveja','Hilos de seda','Sogas de plástico'], 0, 'La totora de la Laguna de Huanacache era clave para sus balsas.'],
+      ['¿En qué laguna navegaban en balsas de totora?', ['Laguna de Huanacache','Lago Nahuel Huapi','Mar Chiquita','Laguna del Plata'], 0, 'Huanacache era el corazón de la vida comunitaria huarpe.'],
+      ['¿Qué guardaban en sus finas canastas impermeables?', ['Comida y líquidos como la aloja','Piedras pesadas','Oro y plata','Fuego encendido'], 0, 'Tejían cestos tan apretados que podían contener líquidos.'],
+      ['¿Qué es la aloja?', ['Una bebida fermentada hecha con algarroba','Un tipo de canasta','Un animal de Cuyo','Una herramienta de caza'], 0, 'La aloja es una bebida tradicional hecha con el fruto del algarrobo fermentado.'],
+      ['¿Para qué servían principalmente las balsas de totora?', ['Para navegar y pescar en la laguna','Para volar','Para hacer techos','Para transportar piedras pesadas'], 0, 'Las balsas de totora eran el principal medio de transporte acuático huarpe.']
+    ]
+  },
+  {
+    topic:'fauna', title:'La fauna de Cuyo', icon:icon('llama'),
+    facts:[
+      ['¿Qué animal era clave para el transporte y la fibra de los Huarpes?', ['El guanaco','Un elefante','Un caballo','Un delfín'], 0, 'El guanaco daba lana, cuero y carne, y era fundamental para la vida huarpe.'],
+      ['¿Qué ave corredora habitaba también la región de Cuyo?', ['El ñandú','El pingüino','El flamenco rosado','El águila calva'], 0, 'El ñandú es una de las aves más representativas del monte cuyano.'],
+      ['¿Qué pequeño animal cazaban los Huarpes por su piel y carne?', ['El zorro','Un oso panda','Un koala','Un canguro'], 0, 'El zorro era un animal común en el monte y muy aprovechado.'],
+      ['¿Qué tipo de ambiente natural predomina donde vivían los Huarpes?', ['Monte y desierto de altura','Selva tropical','Tundra helada','Sabana africana'], 0, 'Cuyo es una zona árida de monte y desierto, al pie de los Andes.'],
+      ['¿Qué aprovechaban del guanaco además de su carne?', ['Su lana y su cuero','Solo sus huesos para hacer música','Nada, lo dejaban libre siempre','Su sangre para pintar cerámica'], 0, 'Con la lana y el cuero del guanaco fabricaban ropa y otros objetos.']
+    ]
+  },
+  {
+    topic:'cultura', title:'La cultura Huarpe', icon:icon('pot'),
+    facts:[
+      ['¿En qué región de Argentina vivían los Huarpes?', ['Cuyo (Mendoza, San Juan y San Luis)','Patagonia','Litoral','Noroeste'], 0, 'Habitaron la región de Cuyo: Mendoza, San Juan y San Luis.'],
+      ['¿Cómo se dividían principalmente los Huarpes?', ['Millcayac y Allentiac','Incas y Mayas','Guanacos y Zorros','Norte y Sur'], 0, 'Se dividían en Millcayac (Mendoza) y Allentiac (San Juan).'],
+      ['¿Qué idiomas hablaban los distintos grupos Huarpes?', ['Millcayac y Allentiac','Solo español','Quechua y guaraní','Mapudungun'], 0, 'El millcayac se hablaba en la zona de Mendoza y el allentiac en San Juan.'],
+      ['¿Qué pasó con la lengua y las costumbres huarpes tras la colonización?', ['Fueron perdiendo fuerza y hablantes con el tiempo','Se expandieron por todo el mundo','No cambiaron en nada','Se volvieron el idioma oficial de Argentina'], 0, 'La colonización española debilitó fuertemente la lengua y las costumbres huarpes.'],
+      ['¿Por qué es importante estudiar hoy la cultura Huarpe?', ['Para valorar la historia de los pueblos originarios de Cuyo','Porque es obligatorio en todo el mundo','Porque ya no existe ninguna comunidad relacionada','Porque reemplaza a toda la historia argentina'], 0, 'Conocer a los Huarpes ayuda a valorar la identidad y la historia de nuestra región.']
+    ]
+  },
+  {
+    topic:'vida', title:'La vida cotidiana Huarpe', icon:icon('wheat'),
+    facts:[
+      ['¿Qué alimento se preparaba con el fruto del algarrobo?', ['El patay, un tipo de pan','El asado','El helado','La pizza'], 0, 'El patay era un pan hecho con harina de algarroba, muy nutritivo.'],
+      ['¿Con qué materiales construían sus viviendas?', ['Ramas, barro y materiales del lugar','Ladrillos importados','Hierro y vidrio','Hormigón armado'], 0, 'Usaban materiales naturales disponibles en la zona, como barro y ramas.'],
+      ['¿Qué actividades combinaban con la agricultura para conseguir alimento?', ['La caza y la recolección','La pesca en el mar','La minería de oro','El comercio marítimo'], 0, 'Además de cultivar, cazaban animales del monte y recolectaban frutos silvestres.'],
+      ['¿Qué más tejían con la totora y el junco, además de cestos?', ['Esteras y otros objetos para el hogar','Autos','Computadoras','Barcos de metal'], 0, 'Con fibras vegetales tejían esteras, cestos y otros elementos cotidianos.'],
+      ['¿Qué rol cumplía la comunidad en el cuidado del agua y los cultivos?', ['Trabajaban en conjunto para mantener acequias y chacras','Cada familia vivía aislada sin ayudar a nadie','No cultivaban nada, solo cazaban','Dependían de otro pueblo para todo'], 0, 'El trabajo comunitario era clave para sostener el riego y la producción de alimentos.']
+    ]
+  }
+];
+
+function pickIntroFacts(base,n=2){
+  const pool=shuffleArray(base.map(q=>q.explain).filter(Boolean));
+  return pool.slice(0,n);
+}
+
+// Tarjeta de repaso: antes de una lección de IA se muestran 1-2 datos ya
+// vistos o directamente relacionados con el tema, para no preguntar sobre
+// algo que todavía no se enseñó en la app.
+function renderAiIntroCard(node,onContinue){
+  showScreen('screen-lesson');
+  document.getElementById('lesson-progress-bar').style.width='0%';
+  document.getElementById('lesson-vidas-count').textContent=state.vidas>0?state.vidas:1;
+  document.getElementById('lesson-streak-count').textContent='0';
+  document.getElementById('lesson-streak-badge').classList.add('hidden');
+  document.getElementById('lesson-feedback-panel').classList.add('hidden');
+  const facts=Array.isArray(node.introFacts)?node.introFacts:[];
+  document.getElementById('lesson-body').innerHTML=`
+    <div class="mb-2 text-center text-xs font-extrabold text-[var(--andes-dark)] ai-generated-title">${escapeHtml(node.introTitle||node.title||'Lección de IA')}</div>
+    <div class="flex-1 flex flex-col justify-center">
+      ${lessonHeader('Repasemos antes de empezar','book')}
+      <div class="w-14 h-14 mx-auto mb-3 text-[var(--andes-dark)]">${node.introIcon||icon('book')}</div>
+      <div class="space-y-3 mb-4">
+        ${facts.length?facts.map(f=>`<div class="bg-[var(--sand)] rounded-2xl p-4 border-2 border-[var(--sand-dark)] text-sm font-bold text-[var(--brown-dark)]">💡 ${escapeHtml(f)}</div>`).join(''):'<div class="bg-[var(--sand)] rounded-2xl p-4 border-2 border-[var(--sand-dark)] text-sm font-bold text-[var(--brown-dark)] text-center">Recordá todo lo que aprendiste sobre los Huarpes.</div>'}
+      </div>
+      <button id="btn-ai-intro-start" class="btn-chunky w-full py-3.5 rounded-2xl text-white font-extrabold font-display bg-[var(--cactus)] border-b-[var(--cactus-dark)]">Empezar ➜</button>
+    </div>`;
+  document.getElementById('btn-ai-intro-start').onclick=()=>{ sfxClick(); onContinue(); };
+}
+
 function makeAiLessonFromBank(){
   const source=AI_CONTENT_BANK[Math.floor(Math.random()*AI_CONTENT_BANK.length)];
   const type=AI_LESSON_TYPES[Math.floor(Math.random()*AI_LESSON_TYPES.length)];
   const id='ia_'+Date.now()+'_'+Math.floor(Math.random()*9999);
   const base=normalizeLessonQuestions(source.facts.map(row=>({q:row[0],options:row[1],correct:row[2],explain:row[3]})));
   const generatedTitle=aiGeneratedTitle(source,type);
+  const introFacts=pickIntroFacts(base,2);
   let questions=[];
 
   if(type==='videocall'){
     questions=base.slice(0,3).map((q,i)=>({prompt:aiQuestionFrom(q,'normal',i),keywords:[String(q.options[q.correct]).toLowerCase(),...(String(q.options[q.correct]).toLowerCase().split(' '))],correctMsg:'¡Bien! '+q.explain,wrongMsg:'Buena tentativa. '+q.explain}));
-    return {id,title:generatedTitle,icon:'📞',type:'videocall',questions,aiGenerated:true,topic:source.topic,completed:false,aiQuestion:questions[0]?.prompt||'Hablemos de Cuyo.'};
+    return {id,title:generatedTitle,icon:icon('phone'),type:'videocall',questions,aiGenerated:true,topic:source.topic,completed:false,aiQuestion:questions[0]?.prompt||'Hablemos de Cuyo.',introFacts,introTitle:generatedTitle,introIcon:icon('phone')};
   }
   if(type==='minigame'){
     const q=base[Math.floor(Math.random()*base.length)];
-    return {id,title:generatedTitle,icon:'🎮',type:'minigame',questions:[{prompt:aiQuestionFrom(q,'normal'),options:q.options,correct:q.correct,explain:q.explain}],gamePrompt:aiQuestionFrom(q,'normal'),aiGenerated:true,topic:source.topic,completed:false};
+    return {id,title:generatedTitle,icon:icon('gamepad'),type:'minigame',questions:[{prompt:aiQuestionFrom(q,'normal'),options:q.options,correct:q.correct,explain:q.explain}],gamePrompt:aiQuestionFrom(q,'normal'),aiGenerated:true,topic:source.topic,completed:false,introFacts,introTitle:generatedTitle,introIcon:icon('gamepad')};
   }
-  if(type==='verdadero_falso') questions=base.slice(0,3).map((q,i)=>({type:'truefalse',q:aiQuestionFrom(q,'normal',i),statement:`${q.options[q.correct]} es la respuesta relacionada con el tema.`,options:['Verdadero','Falso'],correct:0,explain:q.explain}));
+  if(type==='verdadero_falso') questions=base.slice(0,3).map((q,i)=>{
+    const isTrue=Math.random()<0.5;
+    const wrongOptions=q.options.filter((_,idx)=>idx!==q.correct);
+    const statementValue=isTrue?q.options[q.correct]:wrongOptions[Math.floor(Math.random()*wrongOptions.length)];
+    return {
+      type:'truefalse',
+      q:aiQuestionFrom(q,'normal',i),
+      statement:`${statementValue} es la respuesta relacionada con el tema.`,
+      options:['Verdadero','Falso'],
+      correct:isTrue?0:1,
+      explain:isTrue?q.explain:`En realidad, la respuesta correcta es: ${q.options[q.correct]}. ${q.explain}`
+    };
+  });
   else if(type==='completar') questions=base.slice(0,3).map(q=>({type:'fill',q:aiQuestionFrom(q,'normal'),answer:q.options[q.correct],correctText:q.options[q.correct],explain:q.explain}));
   else if(type==='ordenar') questions=[{type:'order',q:'Ordená una secuencia lógica para cuidar el agua en Cuyo.',items:['Observar el canal','Retirar obstáculos','Comprobar el paso del agua','Mantenerlo limpio'],explain:'El orden representa una secuencia de cuidado del agua.'}];
   else if(type==='relacionar') questions=[{type:'match',q:'Relacioná cada elemento con su función o significado.',pairs:[['Acequia','Conduce agua'],['Totora','Material vegetal'],['Guanaco','Fauna nativa'],['Algarrobo','Recurso vegetal']],explain:'Relacionar conceptos refuerza la memoria.'}];
@@ -1213,7 +1340,7 @@ function makeAiLessonFromBank(){
   else if(type==='vocabulario') questions=base.slice(0,3).map(q=>({type:'vocab',q:aiQuestionFrom(q,'normal'),definition:q.q,options:q.options,correct:q.correct,explain:q.explain}));
   else if(type==='cuento'||type==='debate'||type==='exploracion'||type==='normal') questions=base.slice(0,3).map((q,i)=>({...q,q:aiQuestionFrom(q,type,i)}));
 
-  return {id,title:generatedTitle,icon:source.icon,type,questions,aiGenerated:true,topic:source.topic,completed:false,aiQuestion:questions[0]?.q||questions[0]?.prompt||'¿Qué aprendiste?',generatedAt:new Date().toISOString()};
+  return {id,title:generatedTitle,icon:source.icon,type,questions,aiGenerated:true,topic:source.topic,completed:false,aiQuestion:questions[0]?.q||questions[0]?.prompt||'¿Qué aprendiste?',generatedAt:new Date().toISOString(),introFacts,introTitle:generatedTitle,introIcon:source.icon};
 }
 
 randomizeFixedLessonBank();
@@ -1229,7 +1356,9 @@ function generateAILesson(){
     overlay.classList.remove('flex');
     overlay.classList.add('hidden');
     renderPath();
-    beginLessonForNode(newLesson);
+    if(newLesson.type==='videocall') openAiVideollamara(newLesson);
+    else if(newLesson.type==='minigame') openAiMinigame(newLesson);
+    else beginLessonForNode(newLesson);
   },650);
 }
 
@@ -1309,6 +1438,55 @@ function triggerVcQuestion(){
   speakMaraText(qData.prompt);
 }
 
+// Videollamada para lecciones generadas por IA (nodos infinitos de tipo 'videocall').
+function openAiVideollamara(node){
+  const start=()=>{
+    window.activeAiCall=node;
+    document.getElementById('vc-call-title').textContent=node.title||'Videollamada IA';
+    currentVcIndex=0;
+    showScreen('screen-videocall');
+    document.getElementById('vc-step-counter').textContent=`Pregunta 1 de ${node.questions.length}`;
+    triggerAiVideollamaraQuestion();
+  };
+  if(Array.isArray(node.introFacts) && node.introFacts.length){
+    renderAiIntroCard(node,start);
+  }else{
+    start();
+  }
+}
+
+function triggerAiVideollamaraQuestion(){
+  const node=window.activeAiCall;
+  if(!node)return;
+  if(currentVcIndex>=node.questions.length){
+    node.completed=true;
+    state.xp+=30;state.lanzas+=8;state.gemas+=1;
+    saveState();
+    sfxCorrect();
+    document.getElementById('result-icon').textContent='📞✨';
+    document.getElementById('result-title').textContent='¡Videollamada de IA completada!';
+    document.getElementById('result-subtitle').textContent='Mará quedó fascinada con tus respuestas.';
+    document.getElementById('result-rewards').innerHTML=`
+      <div class="bg-white/80 rounded-2xl px-4 py-2 font-extrabold text-[var(--brown-dark)]">🗡️ +8</div>
+      <div class="bg-white/80 rounded-2xl px-4 py-2 font-extrabold text-[var(--andes-dark)]">💎 +1</div>
+      <div class="bg-white/80 rounded-2xl px-4 py-2 font-extrabold text-[var(--gold-dark)]">✨ +30 XP</div>
+    `;
+    showScreen('screen-result');
+    document.getElementById('btn-result-continue').onclick=()=>{
+      window.activeAiCall=null;
+      document.getElementById('vc-call-title').textContent='En vivo con Mará';
+      renderPath();
+      enterMainApp();
+    };
+    return;
+  }
+  const qData=node.questions[currentVcIndex];
+  document.getElementById('vc-step-counter').textContent=`Pregunta ${currentVcIndex+1} de ${node.questions.length}`;
+  document.getElementById('vc-speech-bubble').textContent=`"${qData.prompt}"`;
+  document.getElementById('vc-user-input').value='';
+  speakMaraText(qData.prompt);
+}
+
 document.getElementById('vc-answer-form').onsubmit = (e)=>{
   e.preventDefault();
   const input = document.getElementById('vc-user-input').value.trim().toLowerCase();
@@ -1371,20 +1549,27 @@ function openLesson(nodeId){
 }
 
 function beginLessonForNode(lessonObj){
-  currentLessonState={
-    id:lessonObj.id,
-    title:lessonObj.title,
-    type:lessonObj.type||'normal',
-    questions:normalizeLessonQuestions(lessonObj.questions||[]),
-    currentIndex:0,
-    streak:0,
-    vidas:state.vidas>0?state.vidas:1,
-    memoryState:null,
-    answered:false,
-    startedAt:performance.now()
+  const start=()=>{
+    currentLessonState={
+      id:lessonObj.id,
+      title:lessonObj.title,
+      type:lessonObj.type||'normal',
+      questions:normalizeLessonQuestions(lessonObj.questions||[]),
+      currentIndex:0,
+      streak:0,
+      vidas:state.vidas>0?state.vidas:1,
+      memoryState:null,
+      answered:false,
+      startedAt:performance.now()
+    };
+    showScreen('screen-lesson');
+    renderCurrentQuestion();
   };
-  showScreen('screen-lesson');
-  renderCurrentQuestion();
+  if(lessonObj.aiGenerated && Array.isArray(lessonObj.introFacts) && lessonObj.introFacts.length){
+    renderAiIntroCard(lessonObj,start);
+  }else{
+    start();
+  }
 }
 
 function lessonQuestionProgress(){
@@ -1418,8 +1603,8 @@ function renderCurrentQuestion(){
   renderChoiceQuestion(q);
 }
 
-function lessonHeader(label,emoji){
-  return `<div class="lesson-type-badge">${emoji} ${label}</div>`;
+function lessonHeader(label,iconKey){
+  return `<div class="lesson-type-badge"><span class="inline-block w-5 h-5 align-middle -mt-0.5 mr-1">${icon(iconKey)}</span>${label}</div>`;
 }
 
 function renderChoiceQuestion(q){
@@ -1427,7 +1612,7 @@ function renderChoiceQuestion(q){
   q.options=options.options;q.correct=options.correct;
   setLessonBody(`
     <div class="flex-1 flex flex-col justify-center">
-      ${lessonHeader('Pregunta interactiva','🧠')}
+      ${lessonHeader('Pregunta interactiva','brain')}
       <h3 class="text-xl font-extrabold text-[var(--brown-dark)] font-display mb-6 text-center leading-snug">${q.q}</h3>
       <div class="grid grid-cols-1 gap-3">
         ${q.options.map((opt,i)=>`<button data-idx="${i}" class="lesson-option btn-option btn-chunky w-full py-3.5 px-4 rounded-2xl border-2 border-[var(--sand-dark)] bg-white text-[var(--brown-dark)] font-bold text-base text-left shadow-sm">${opt}</button>`).join('')}
@@ -1439,7 +1624,7 @@ function renderChoiceQuestion(q){
 function renderTrueFalseQuestion(q){
   setLessonBody(`
     <div class="flex-1 flex flex-col justify-center">
-      ${lessonHeader('Verdadero o falso','⚖️')}
+      ${lessonHeader('Verdadero o falso','scale')}
       <p class="text-sm text-[var(--brown)] text-center mb-3">Leé con atención antes de decidir.</p>
       <div class="bg-[var(--sand)] rounded-3xl p-5 mb-5 border-2 border-[var(--sand-dark)] text-center font-extrabold">${q.statement}</div>
       <div class="grid grid-cols-2 gap-3">
@@ -1453,7 +1638,7 @@ function renderTrueFalseQuestion(q){
 function renderFillQuestion(q){
   setLessonBody(`
     <div class="flex-1 flex flex-col justify-center">
-      ${lessonHeader('Completá la respuesta','✍️')}
+      ${lessonHeader('Completá la respuesta','pencil')}
       <h3 class="text-xl font-extrabold text-[var(--brown-dark)] font-display mb-4 text-center">${q.q}</h3>
       <input id="fill-answer" class="fill-input mb-3" maxlength="60" placeholder="Escribí tu respuesta..." autocomplete="off">
       <button id="fill-submit" class="btn-chunky py-3.5 rounded-2xl bg-[var(--cactus)] border-b-[var(--cactus-dark)] text-white font-extrabold">Comprobar</button>
@@ -1473,7 +1658,7 @@ function renderOrderQuestion(q){
   const items=shuffleArray(q.items);
   setLessonBody(`
     <div class="flex-1 flex flex-col justify-center">
-      ${lessonHeader('Ordená la secuencia','🔢')}
+      ${lessonHeader('Ordená la secuencia','listNumber')}
       <h3 class="text-lg font-extrabold text-[var(--brown-dark)] font-display mb-4 text-center">${q.q}</h3>
       <div id="order-list" class="flex flex-col gap-2 mb-4">
         ${items.map((item,i)=>`<button draggable="true" data-item="${item}" class="lesson-sort-item btn-chunky bg-white border-2 border-[var(--sand-dark)] rounded-2xl px-4 py-3 text-left font-bold"><span class="mr-2">${i+1}.</span>${item}</button>`).join('')}
@@ -1501,7 +1686,7 @@ function renderMatchQuestion(q){
   const right=shuffleArray(q.pairs.map(p=>p[1]));
   setLessonBody(`
     <div class="flex-1 flex flex-col justify-center">
-      ${lessonHeader('Relacioná conceptos','🔗')}
+      ${lessonHeader('Relacioná conceptos','link')}
       <h3 class="text-lg font-extrabold text-[var(--brown-dark)] font-display mb-4 text-center">${q.q}</h3>
       <div class="grid grid-cols-1 gap-3 mb-4">${left.map((l,i)=>`<label class="bg-white border-2 border-[var(--sand-dark)] rounded-2xl p-3"><span class="block font-extrabold mb-1">${l}</span><select data-left="${l}" class="match-select w-full bg-[var(--sand)] rounded-xl px-3 py-2 font-bold"><option value="">Elegí...</option>${right.map(r=>`<option>${r}</option>`).join('')}</select></label>`).join('')}</div>
       <button id="match-check" class="btn-chunky py-3.5 rounded-2xl bg-[var(--cactus)] border-b-[var(--cactus-dark)] text-white font-extrabold">Comprobar relaciones</button>
@@ -1516,7 +1701,7 @@ function renderMatchQuestion(q){
 function renderMultiQuestion(q){
   setLessonBody(`
     <div class="flex-1 flex flex-col justify-center">
-      ${lessonHeader('Selección múltiple','☑️')}
+      ${lessonHeader('Selección múltiple','checklist')}
       <h3 class="text-lg font-extrabold text-[var(--brown-dark)] font-display mb-2 text-center">${q.prompt}</h3>
       <p class="text-xs text-[var(--brown)] text-center mb-4">Podés marcar más de una.</p>
       <div class="grid grid-cols-1 gap-2 mb-4">${q.options.map((o,i)=>`<label class="multi-check bg-white border-2 border-[var(--sand-dark)] rounded-2xl px-4 py-3 font-bold"><input type="checkbox" value="${i}"><span>${o}</span></label>`).join('')}</div>
@@ -1541,7 +1726,7 @@ function renderMemoryQuestion(q){
   const ms=currentLessonState.memoryState;
   setLessonBody(`
     <div class="flex-1 flex flex-col justify-center">
-      ${lessonHeader('Memoria Huarpe','🧩')}
+      ${lessonHeader('Memoria Huarpe','puzzle')}
       <h3 class="text-lg font-extrabold text-[var(--brown-dark)] font-display mb-4 text-center">${q.q}</h3>
       <div class="lesson-memory-grid">${ms.deck.map((c,i)=>`<div class="memory-card"><button data-memory="${i}" class="memory-btn btn-chunky rounded-2xl bg-[var(--andes)] text-white border-b-[var(--andes-dark)] text-xl font-extrabold">${c.matched?'✓':c.flipped?c.value:'?'}</button></div>`).join('')}</div>
       <p class="text-xs text-[var(--brown)] text-center mt-4">Parejas encontradas: ${ms.matches}/4</p>
@@ -1572,7 +1757,7 @@ function flipMemory(index,q){
 function renderQuickQuestion(q){
   setLessonBody(`
     <div class="flex-1 flex flex-col justify-center">
-      ${lessonHeader('Desafío rápido','⚡')}
+      ${lessonHeader('Desafío rápido','bolt')}
       <div id="quick-timer" class="text-center text-3xl font-extrabold text-[var(--clay-dark)] font-display mb-3">9</div>
       <h3 class="text-xl font-extrabold text-[var(--brown-dark)] font-display mb-6 text-center">${q.q}</h3>
       <div class="grid grid-cols-1 gap-3">${q.options.map((o,i)=>`<button data-idx="${i}" class="btn-option btn-chunky py-3.5 px-4 rounded-2xl bg-white border-2 border-[var(--sand-dark)] text-left font-bold">${o}</button>`).join('')}</div>
@@ -1599,12 +1784,12 @@ function showFeedback(correct,q,customMessage){
   document.querySelectorAll('.btn-option,.lesson-sort-item,.memory-btn,.multi-check').forEach(b=>{if('disabled'in b)b.disabled=true;});
   if(correct){
     panel.className='px-5 py-4 border-t-2 bg-[#EAF5E8] border-[var(--cactus)] text-[var(--cactus-dark)]';
-    iconSpan.textContent='🎉';titleP.textContent='¡Correcto!';explainP.textContent=customMessage||q.explain;
+    iconSpan.innerHTML=icon('celebrate');titleP.textContent='¡Correcto!';explainP.textContent=customMessage||q.explain;
     continueBtn.className='btn-chunky w-full py-3.5 rounded-2xl text-white font-extrabold font-display bg-[var(--cactus)] border-b-[var(--cactus-dark)]';
     continueBtn.textContent='Siguiente';
   }else{
     panel.className='px-5 py-4 border-t-2 bg-[#FDE8E8] border-[var(--clay)] text-[var(--clay-dark)]';
-    iconSpan.textContent='💡';titleP.textContent='Casi';explainP.textContent=customMessage||q.explain;
+    iconSpan.innerHTML=icon('lightbulb');titleP.textContent='Casi';explainP.textContent=customMessage||q.explain;
     continueBtn.className='btn-chunky w-full py-3.5 rounded-2xl text-white font-extrabold font-display bg-[var(--clay)] border-b-[var(--clay-dark)]';
     continueBtn.textContent=currentLessonState.vidas<=0?'Ver resultado':'Entendido';
   }
@@ -1723,6 +1908,19 @@ function resizeGameCanvas(){
   if(!game.active)game.y=game.ground-48;
 }
 
+// Minijuego para lecciones generadas por IA (nodos infinitos de tipo 'minigame').
+function openAiMinigame(node){
+  const start=()=>{
+    window.activeAiGame=node;
+    openMinigame();
+  };
+  if(Array.isArray(node.introFacts) && node.introFacts.length){
+    renderAiIntroCard(node,start);
+  }else{
+    start();
+  }
+}
+
 function openMinigame(){
   stopGameLoop();
   showScreen('screen-game');
@@ -1750,6 +1948,13 @@ function resetGame(){
   game.lastObstacleX=game.width;
   gameHudLast=-1;
   gameJumpQueued=false;
+  if(window.activeAiGame){
+    document.getElementById('game-screen-title').textContent=window.activeAiGame.title||'Desafío de IA 🎮';
+    document.getElementById('game-screen-subtitle').textContent=window.activeAiGame.gamePrompt?`Pensá en esto mientras corrés: ${window.activeAiGame.gamePrompt}`:'Tocá la pantalla para saltar los cactus';
+  }else{
+    document.getElementById('game-screen-title').textContent='Carrera del Guanaco 🦙';
+    document.getElementById('game-screen-subtitle').textContent='Tocá la pantalla para saltar los cactus';
+  }
   document.getElementById('game-distance').textContent='0';
   document.getElementById('game-start-overlay').classList.remove('hidden');
   document.getElementById('game-over-overlay').classList.add('hidden');
@@ -1825,11 +2030,11 @@ function updateGame(dt){
     }
   }
 
-  const player={x:38,y:game.y+5,w:48,h:43};
+  const player={x:50,y:game.y+14,w:26,h:28};
   for(let i=game.obstacles.length-1;i>=0;i--){
     const obs=game.obstacles[i];
     obs.x-=game.speed*dt;
-    const hit=player.x<obs.x+obs.w-3&&player.x+player.w>obs.x+3&&player.y<game.ground-obs.h&&player.y+player.h>game.ground-obs.h+4;
+    const hit=player.x<obs.x+obs.w-6&&player.x+player.w>obs.x+6&&player.y<game.ground-obs.h&&player.y+player.h>game.ground-obs.h+6;
     if(hit){gameOver();return;}
     if(obs.x+obs.w<-30)game.obstacles.splice(i,1);
   }
@@ -1920,13 +2125,16 @@ function gameOver(){
 function continueAfterGuanaco(){
   if(window.activeAiGame){
     window.activeAiGame.completed=true;
+    state.xp+=20;state.gemas+=1;
     saveState();
     const node=window.activeAiGame;
     window.activeAiGame=null;
+    document.getElementById('game-screen-title').textContent='Carrera del Guanaco 🦙';
+    document.getElementById('game-screen-subtitle').textContent='Tocá la pantalla para saltar los cactus';
     document.getElementById('game-over-overlay').classList.add('hidden');
     renderPath();
     enterMainApp();
-    setTimeout(()=>{ if(node) petSay('¡Desafío IA completado! Ya podés seguir con la próxima aventura.'); },250);
+    setTimeout(()=>{ if(node) petSay('¡Desafío IA completado! +20 XP y +1 💎. Ya podés seguir con la próxima aventura.'); },250);
     return;
   }
   // El nodo 4 es la carrera y el nodo 5 es la siguiente lección.
@@ -1944,9 +2152,16 @@ function continueAfterGuanaco(){
 const gameArea=document.getElementById('game-area');
 gameArea.addEventListener('pointerdown',jumpGuanaco,{passive:true});
 document.getElementById('btn-game-retry').onclick=resetGame;
+function exitGameToMainApp(){
+  stopGameLoop();
+  window.activeAiGame=null;
+  document.getElementById('game-screen-title').textContent='Carrera del Guanaco 🦙';
+  document.getElementById('game-screen-subtitle').textContent='Tocá la pantalla para saltar los cactus';
+  enterMainApp();
+}
 document.getElementById('btn-game-continue').onclick=continueAfterGuanaco;
-document.getElementById('btn-game-finish').onclick=enterMainApp;
-document.getElementById('btn-exit-game').onclick=()=>{stopGameLoop();enterMainApp();};
+document.getElementById('btn-game-finish').onclick=exitGameToMainApp;
+document.getElementById('btn-exit-game').onclick=exitGameToMainApp;
 window.addEventListener('resize',()=>{if(document.getElementById('screen-game').classList.contains('active'))resizeGameCanvas();},{passive:true});
 
 // --- 11B) MASCOTA COMPAÑERA PERMANENTE ---
