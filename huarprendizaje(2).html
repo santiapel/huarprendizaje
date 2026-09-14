@@ -1,0 +1,2583 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Huarprendizaje: Guardianes de Cuyo</title>
+<meta name="description" content="Huarprendizaje es una aventura educativa interactiva sobre la cultura Huarpe, Cuyo y el cuidado del agua, con lecciones generadas por IA, videollamaras, minijuegos, mascotas y desafíos interactivos.">
+<script src="https://cdn.tailwindcss.com">
+
+pruneOldInfiniteLessons(30);
+
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    /* Paleta inspirada en el desierto de Cuyo, la cordillera y el algarrobo */
+    --sand:      #F6EEDD;   /* arena clara */
+    --sand-dark: #EADFC4;   /* arena en sombra */
+    --clay:      #C1502E;   /* barro / terracota */
+    --clay-dark: #9E3D21;
+    --cactus:    #4C7A3F;   /* verde jarilla/cactus */
+    --cactus-dark:#396030;
+    --gold:      #E3A73C;   /* sol de Cuyo */
+    --gold-dark: #B9822A;
+    --andes:     #2F6E7A;   /* cielo andino */
+    --andes-dark:#20535D;
+    --brown:     #6B4226;   /* guanaco / tierra */
+    --brown-dark:#4A2C18;
+    --cream:     #FFFBF2;
+    --ink:       #3A2A1C;
+  }
+  *{ -webkit-tap-highlight-color: transparent; }
+  html, body{
+    font-family: 'Nunito', sans-serif;
+    background: var(--sand);
+    color: var(--ink);
+    overscroll-behavior: none;
+  }
+  h1,h2,h3,.font-display{ font-family: 'Baloo 2', cursive; }
+  .screen{ display:none; }
+  .screen.active{ display:flex; }
+  /* Botón estilo "chunky" 3D que se aplasta al presionar */
+  .btn-chunky{
+    border-bottom-width: 5px;
+    transition: transform .06s ease, border-bottom-width .06s ease, box-shadow .06s ease;
+  }
+  .btn-chunky:active{
+    transform: translateY(3px);
+    border-bottom-width: 2px;
+  }
+  .btn-chunky:disabled{ opacity:.5; filter:grayscale(.4); cursor:not-allowed; }
+
+  /* Animaciones */
+  @keyframes shake{
+    10%,90%{ transform: translateX(-3px); }
+    20%,80%{ transform: translateX(6px); }
+    30%,50%,70%{ transform: translateX(-10px); }
+    40%,60%{ transform: translateX(10px); }
+  }
+  .shake-anim{ animation: shake .5s; }
+  
+  @keyframes bounce-slow{
+    0%,100%{ transform: translateY(0); }
+    50%{ transform: translateY(-8px); }
+  }
+  .bounce-slow{ animation: bounce-slow 2.4s ease-in-out infinite; }
+
+  @keyframes pulse-ring{
+    0%{ box-shadow: 0 0 0 0 rgba(76,122,63,.55); }
+    70%{ box-shadow: 0 0 0 14px rgba(76,122,63,0); }
+    100%{ box-shadow: 0 0 0 0 rgba(76,122,63,0); }
+  }
+  .pulse-ring{ animation: pulse-ring 1.8s infinite; }
+
+  /* Mara Hablando animación */
+  @keyframes mara-talk {
+    0%, 100% { transform: scaleY(1); }
+    50% { transform: scaleY(1.3); }
+  }
+  .mara-speaking .mara-mouth {
+    animation: mara-talk 0.22s infinite alternate;
+  }
+  @keyframes mara-blink {
+    0%, 90%, 100% { transform: scaleY(1); }
+    95% { transform: scaleY(0.1); }
+  }
+  .mara-eye { transform-origin: center; animation: mara-blink 4s infinite; }
+
+  /* Camino de niveles */
+  #path-container{ scrollbar-width: none; }
+  #path-container::-webkit-scrollbar{ display:none; }
+  .path-node{ transition: transform .15s ease; }
+  .path-node:active{ transform: scale(.92); }
+
+  /* Fondo desértico */
+  .desert-bg{ background: linear-gradient(180deg, #F3E3B8 0%, var(--sand) 55%); }
+  .mountain-silhouette{
+    position:absolute; bottom:0; left:0; width:100%; height:60px;
+    background: var(--andes);
+    opacity:.18;
+    clip-path: polygon(0% 100%, 0% 60%, 10% 30%, 20% 55%, 32% 15%, 45% 50%, 58% 20%, 70% 58%, 82% 25%, 92% 55%, 100% 40%, 100% 100%);
+  }
+  
+  input:focus{ outline: none; }
+  .avatar-option.selected{
+    border-color: var(--cactus);
+    background: #E7F1E2;
+    transform: scale(1.08);
+  }
+  .diff-card.selected{
+    outline: 4px solid var(--ink);
+    outline-offset: 2px;
+  }
+
+  /* Navegación inferior */
+  .tab-btn.active-tab{ color: var(--cactus-dark); }
+  .tab-btn.active-tab .tab-icon-wrap{ background: #E1EFDA; }
+  
+  ::-webkit-scrollbar{ width: 6px; }
+  ::-webkit-scrollbar-thumb{ background: var(--sand-dark); border-radius: 4px; }
+
+  /* Toggle Switch */
+  .toggle-switch{
+    width:46px; height:26px; border-radius:999px; background: var(--sand-dark);
+    position:relative; transition: background .2s ease; flex-shrink:0; border:2px solid transparent;
+  }
+  .toggle-switch::after{
+    content:''; position:absolute; top:2px; left:2px; width:18px; height:18px; border-radius:50%;
+    background:#fff; box-shadow:0 1px 3px rgba(0,0,0,.3); transition: transform .2s ease;
+  }
+  .toggle-switch.on{ background: var(--cactus); }
+  .toggle-switch.on::after{ transform: translateX(20px); }
+
+  /* Modo Oscuro completo */
+  #app-root.dark-mode{
+    --sand:#171411; --sand-dark:#2A241E; --cream:#201B17; --ink:#F3E9D8;
+    --clay:#D06A48; --clay-dark:#A94E34; --cactus:#6F9A5F; --cactus-dark:#527844;
+    --gold:#E6B557; --gold-dark:#C79435; --andes:#4C8A96; --andes-dark:#326B76;
+    --brown:#C7A17C; --brown-dark:#F0D7B8;
+    background:var(--cream); color:var(--ink);
+  }
+  #app-root.dark-mode .bg-white,
+  #app-root.dark-mode .bg-white\/70,
+  #app-root.dark-mode .bg-white\/80{ background:#302820 !important; color:var(--ink) !important; }
+  #app-root.dark-mode .bg-\[\#FBF3DD\]{ background:#29231D !important; }
+  #app-root.dark-mode .bg-\[\#F3E3B8\]{ background:#211C18 !important; }
+  #app-root.dark-mode .bg-\[\#EAF5E8\]{ background:#243322 !important; }
+  #app-root.dark-mode .bg-\[\#FDE8E8\]{ background:#3A2422 !important; }
+  #app-root.dark-mode .text-black{ color:#F3E9D8 !important; }
+  #app-root.dark-mode input,
+  #app-root.dark-mode select,
+  #app-root.dark-mode textarea{ background:#2C251F !important; color:#F3E9D8 !important; border-color:#4A3D31 !important; }
+  #app-root.dark-mode .border-\[var(--sand-dark)\]{ border-color:#4A3D31 !important; }
+  #app-root.dark-mode nav{ background:#211C18 !important; }
+  #app-root.dark-mode .desert-bg{ background:#201B17 !important; }
+  #app-root.dark-mode h1, #app-root.dark-mode h2, #app-root.dark-mode h3,
+  #app-root.dark-mode h4, #app-root.dark-mode p, #app-root.dark-mode label,
+  #app-root.dark-mode span{ text-shadow:none; }
+  #app-root.dark-mode .toggle-switch{ background:#51463A; }
+  #app-root.dark-mode .toggle-switch.on{ background:var(--cactus); }
+
+  body:has(#app-root.dark-mode){ background:#171411 !important; color:#F3E9D8; }
+
+  /* Transición de pantalla */
+  .screen.active{ animation: screen-fade .25s ease; }
+  @keyframes screen-fade{ from{ opacity:0; transform: translateY(6px);} to{ opacity:1; transform:translateY(0);} }
+
+
+  /* ================================================================
+     MEJORAS VISUALES HUARPE - VIDEOLLAMADA
+     ================================================================ */
+  .huarpe-call-bg{
+    position:absolute;
+    inset:0;
+    overflow:hidden;
+    background:
+      linear-gradient(180deg, rgba(28,20,15,.42), rgba(28,20,15,.78)),
+      url('https://upload.wikimedia.org/wikipedia/commons/5/5e/Huarpe_member.jpg') center/cover no-repeat;
+    filter:saturate(.88) contrast(1.05);
+  }
+  .huarpe-call-bg::before{
+    content:'';
+    position:absolute;
+    inset:-12%;
+    background:
+      radial-gradient(circle at 20% 20%, rgba(227,167,60,.28), transparent 26%),
+      radial-gradient(circle at 82% 32%, rgba(76,122,63,.25), transparent 25%),
+      linear-gradient(115deg, transparent 35%, rgba(255,255,255,.09) 50%, transparent 65%);
+    animation:huarpe-light 9s ease-in-out infinite alternate;
+    pointer-events:none;
+  }
+  .huarpe-call-bg::after{
+    content:'';
+    position:absolute;
+    inset:0;
+    background-image:
+      radial-gradient(circle, rgba(255,255,255,.18) 0 1px, transparent 1.5px),
+      linear-gradient(135deg, transparent 48%, rgba(227,167,60,.10) 49%, transparent 50%);
+    background-size:28px 28px, 180px 180px;
+    mix-blend-mode:screen;
+    opacity:.28;
+    animation:huarpe-drift 18s linear infinite;
+    pointer-events:none;
+  }
+  .huarpe-petal-layer{
+    position:absolute;
+    inset:0;
+    pointer-events:none;
+    opacity:.55;
+  }
+  .huarpe-petal{
+    position:absolute;
+    width:8px;
+    height:8px;
+    border-radius:2px;
+    background:rgba(227,167,60,.72);
+    transform:rotate(45deg);
+    animation:huarpe-float 7s linear infinite;
+  }
+  @keyframes huarpe-light{
+    from{transform:translate3d(-2%,-1%,0) scale(1.04);}
+    to{transform:translate3d(3%,2%,0) scale(1.10);}
+  }
+  @keyframes huarpe-drift{
+    from{background-position:0 0,0 0;}
+    to{background-position:160px 80px,180px 180px;}
+  }
+  @keyframes huarpe-float{
+    from{transform:translate3d(0,110vh,0) rotate(45deg); opacity:0;}
+    15%{opacity:.7;}
+    85%{opacity:.7;}
+    to{transform:translate3d(50px,-20vh,0) rotate(230deg); opacity:0;}
+  }
+  .vc-glass-panel{
+    background:rgba(25,20,16,.62);
+    border:1px solid rgba(255,255,255,.14);
+    box-shadow:0 18px 55px rgba(0,0,0,.35);
+    backdrop-filter:blur(13px);
+    -webkit-backdrop-filter:blur(13px);
+  }
+  .vc-audio-meter{
+    display:flex;
+    align-items:flex-end;
+    justify-content:center;
+    gap:3px;
+    height:20px;
+    margin-top:8px;
+  }
+  .vc-audio-meter i{
+    display:block;
+    width:4px;
+    height:5px;
+    border-radius:4px;
+    background:#E3A73C;
+    opacity:.45;
+  }
+  .mara-speaking .vc-audio-meter i:nth-child(1){animation:meter .34s ease-in-out infinite alternate .02s;}
+  .mara-speaking .vc-audio-meter i:nth-child(2){animation:meter .25s ease-in-out infinite alternate .09s;}
+  .mara-speaking .vc-audio-meter i:nth-child(3){animation:meter .42s ease-in-out infinite alternate .04s;}
+  .mara-speaking .vc-audio-meter i:nth-child(4){animation:meter .29s ease-in-out infinite alternate .13s;}
+  .mara-speaking .vc-audio-meter i:nth-child(5){animation:meter .37s ease-in-out infinite alternate .07s;}
+  @keyframes meter{from{height:4px;opacity:.45;}to{height:19px;opacity:1;}}
+  .mara-mouth-single{transform-box:fill-box;transform-origin:center;}
+  .mara-speaking .mara-mouth-single{animation:mara-mouth-open .16s ease-in-out infinite alternate;}
+  @keyframes mara-mouth-open{from{transform:scaleY(.45);}to{transform:scaleY(1.55);}}
+
+  /* ================================================================
+     MEJORAS DE LECCIONES
+     ================================================================ */
+  .lesson-option{position:relative;overflow:hidden;}
+  .lesson-option::after{
+    content:'';
+    position:absolute;
+    inset:0;
+    background:linear-gradient(100deg,transparent,rgba(255,255,255,.18),transparent);
+    transform:translateX(-120%);
+    transition:transform .45s ease;
+    pointer-events:none;
+  }
+  .lesson-option:hover::after{transform:translateX(120%);}
+  .lesson-type-badge{
+    display:inline-flex;
+    align-items:center;
+    gap:5px;
+    width:max-content;
+    padding:5px 9px;
+    border-radius:999px;
+    background:rgba(76,122,63,.11);
+    color:var(--cactus-dark);
+    font-size:11px;
+    font-weight:900;
+    margin-bottom:10px;
+  }
+  .lesson-sort-item{cursor:grab;user-select:none;touch-action:none;}
+  .lesson-sort-item.dragging{opacity:.5;transform:scale(.98);}
+  .lesson-memory-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;}
+  .memory-card{min-height:76px;perspective:600px;}
+  .memory-card button{width:100%;height:100%;min-height:76px;}
+  .fill-input{
+    width:100%;
+    border:2px solid var(--sand-dark);
+    border-radius:16px;
+    padding:12px 14px;
+    background:white;
+    color:var(--ink);
+    font-weight:800;
+  }
+  .multi-check{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    width:100%;
+    text-align:left;
+  }
+  .multi-check input{width:19px;height:19px;accent-color:var(--cactus);}
+
+  /* ================================================================
+     MINIJUEGO: RENDER EFICIENTE Y GUANACO HACIA ADELANTE
+     ================================================================ */
+  #game-canvas{image-rendering:auto;touch-action:none;}
+  .game-hud-chip{backdrop-filter:blur(7px);-webkit-backdrop-filter:blur(7px);}
+  .game-sun-glow{
+    position:absolute;
+    width:150px;
+    height:150px;
+    right:-40px;
+    top:-40px;
+    border-radius:50%;
+    background:rgba(227,167,60,.25);
+    filter:blur(8px);
+    pointer-events:none;
+  }
+  .game-performance-note{
+    font-size:10px;
+    opacity:.65;
+    text-align:center;
+    margin-top:5px;
+  }
+
+
+  /* ================================================================
+     MASCOTA COMPAÑERA + MICROANIMACIONES
+     ================================================================ */
+  #companion-pet{position:fixed;right:12px;bottom:76px;z-index:45;width:58px;height:58px;border-radius:22px;background:linear-gradient(145deg,var(--gold),var(--clay));border:3px solid rgba(255,255,255,.85);box-shadow:0 12px 28px rgba(0,0,0,.2);display:flex;align-items:center;justify-content:center;font-size:32px;cursor:pointer;animation:pet-float 2.8s ease-in-out infinite;transition:transform .2s ease,filter .2s ease}
+  #companion-pet:hover{transform:scale(1.08) rotate(-3deg);filter:saturate(1.15)}
+  #companion-pet.speaking{animation:pet-talk .32s ease-in-out infinite alternate}
+  #companion-pet-bubble{position:fixed;right:16px;bottom:140px;z-index:46;max-width:220px;background:var(--cream);color:var(--ink);border:2px solid var(--sand-dark);border-radius:18px 18px 4px 18px;padding:9px 12px;font-size:11px;font-weight:800;box-shadow:0 10px 25px rgba(0,0,0,.16);opacity:0;transform:translateY(8px) scale(.96);pointer-events:none;transition:opacity .2s ease,transform .2s ease}
+  #companion-pet-bubble.show{opacity:1;transform:translateY(0) scale(1)}
+  @keyframes pet-float{0%,100%{transform:translateY(0) rotate(0)}50%{transform:translateY(-7px) rotate(2deg)}}
+  @keyframes pet-talk{from{transform:scale(1)}to{transform:scale(1.08) rotate(-2deg)}}
+  @keyframes lesson-pop{from{opacity:0;transform:translateY(12px) scale(.98)}to{opacity:1;transform:none}}
+  #lesson-body>*{animation:lesson-pop .28s ease both}
+  .ai-generated-title{background:linear-gradient(90deg,var(--clay-dark),var(--cactus-dark));-webkit-background-clip:text;background-clip:text;color:transparent}
+  .vc-user-speaking{animation:pet-talk .28s ease-in-out infinite alternate}
+  #app-root.dark-mode #companion-pet-bubble{background:#302820;color:var(--ink);border-color:#4A3D31}
+  #app-root.dark-mode #game-canvas{filter:brightness(.82) saturate(.85)}
+  #app-root.dark-mode .game-sun-glow{opacity:.55}
+
+</style>
+</head>
+<body class="min-h-screen">
+
+<div id="app-root" class="max-w-md mx-auto min-h-screen bg-[var(--cream)] relative shadow-2xl overflow-hidden flex flex-col">
+
+  <!-- ======================================================= -->
+  <!-- PANTALLA 1: BIENVENIDA / PERFIL INICIAL                  -->
+  <!-- ======================================================= -->
+  <section id="screen-welcome" class="screen active flex-col w-full min-h-screen desert-bg relative px-6 pt-8 pb-8 overflow-y-auto">
+    <div class="mountain-silhouette"></div>
+
+    <div class="relative z-10 flex flex-col items-center text-center">
+      <div class="bounce-slow mb-1" id="huarpi-mascot-welcome"></div>
+      <h1 class="text-3xl font-extrabold text-[var(--clay-dark)] font-display mt-1">Huarprendizaje</h1>
+      <p class="text-sm text-[var(--brown)] mt-1 max-w-[280px]">Aprendé jugando sobre el pueblo Huarpe, guardián del agua y la tierra de Cuyo.</p>
+    </div>
+
+    <div class="relative z-10 mt-6 bg-white/70 backdrop-blur rounded-3xl p-5 shadow-sm">
+      <label class="block text-sm font-bold text-[var(--brown-dark)] mb-1.5">¿Cómo te llamás?</label>
+      <input id="input-username" maxlength="18" type="text" placeholder="Escribí tu nombre"
+        class="w-full rounded-2xl border-2 border-[var(--sand-dark)] px-4 py-2.5 text-base font-semibold bg-[var(--cream)] focus:border-[var(--cactus)]">
+
+      <label class="block text-sm font-bold text-[var(--brown-dark)] mt-4 mb-1.5">Elegí tu avatar</label>
+      <div id="avatar-picker" class="grid grid-cols-4 gap-2"></div>
+
+      <label class="block text-sm font-bold text-[var(--brown-dark)] mt-4 mb-1.5">Elegí tu dificultad</label>
+      <div id="difficulty-picker" class="grid grid-cols-1 gap-2.5"></div>
+    </div>
+
+    <button id="btn-start-app" class="btn-chunky relative z-10 mt-5 w-full py-3.5 rounded-2xl text-white font-extrabold text-lg font-display
+      bg-[var(--cactus)] border-b-[var(--cactus-dark)]">
+      ¡Empezar la aventura! 🌵
+    </button>
+  </section>
+
+  <!-- ======================================================= -->
+  <!-- PANTALLA 2: APP PRINCIPAL (Camino / Liga / Perfil)       -->
+  <!-- ======================================================= -->
+  <section id="screen-app" class="screen flex-col w-full min-h-screen relative">
+
+    <!-- Barra superior -->
+    <header class="sticky top-0 z-30 bg-[var(--cream)]/95 backdrop-blur border-b border-[var(--sand-dark)] px-4 py-2.5 flex items-center justify-between">
+      <div class="flex items-center gap-1.5">
+        <span class="w-5 h-5 text-[var(--brown-dark)] icon-lanzas"></span>
+        <span id="stat-lanzas" class="font-extrabold text-[var(--brown-dark)] font-display text-sm">0</span>
+      </div>
+      <div class="flex items-center gap-1.5">
+        <span class="w-5 h-5 text-[var(--andes-dark)] icon-gemas"></span>
+        <span id="stat-gemas" class="font-extrabold text-[var(--andes-dark)] font-display text-sm">0</span>
+      </div>
+      <div class="flex items-center gap-1.5">
+        <span class="w-5 h-5 text-[var(--clay-dark)] icon-vidas"></span>
+        <span id="stat-vidas" class="font-extrabold text-[var(--clay-dark)] font-display text-sm">5</span>
+      </div>
+      <div class="flex items-center gap-1.5 bg-[var(--gold)]/25 px-2.5 py-1 rounded-full">
+        <span class="w-4 h-4 text-[var(--gold-dark)] icon-nivel"></span>
+        <span id="stat-nivel" class="font-extrabold text-[var(--gold-dark)] text-xs font-display">Nivel 1</span>
+      </div>
+      <button id="btn-open-settings" class="w-8 h-8 rounded-full flex items-center justify-center text-[var(--brown)] hover:bg-[var(--sand-dark)]/50 icon-settings" title="Ajustes"></button>
+    </header>
+
+    <!-- TAB: CAMINO CON FLECHA DE NAVEGACIÓN DESPLAZABLE -->
+    <div id="tab-camino" class="tab-content flex-1 overflow-y-auto desert-bg relative scroll-smooth">
+      <div class="mountain-silhouette"></div>
+      
+      <div class="relative z-10 text-center pt-4 pb-1 px-4">
+        <h2 class="text-xl font-extrabold text-[var(--brown-dark)] font-display">El Sendero del Huarpe</h2>
+        <p class="text-xs text-[var(--brown)]">Explorá las lecciones, videollamaras, minijuegos y misiones de IA</p>
+      </div>
+
+      <div id="path-container" class="relative z-10 px-6 pb-20 pt-4 flex flex-col items-center gap-8"></div>
+
+      <!-- BOTÓN FLOTANTE DE FLECHA (Ir abajo / Ir arriba) -->
+      <button id="btn-scroll-arrow" class="fixed bottom-16 right-5 z-40 bg-[var(--cactus)] text-white w-12 h-12 rounded-full shadow-xl border-2 border-white flex items-center justify-center text-xl transition-all hover:scale-110 active:scale-95" title="Desplazarse">
+        <span id="arrow-icon">👇</span>
+      </button>
+    </div>
+
+    <!-- TAB: LIGA DEL CÓNDOR -->
+    <div id="tab-liga" class="tab-content flex-1 overflow-y-auto hidden">
+      <div class="px-5 pt-5 pb-3 text-center bg-gradient-to-b from-[var(--andes)]/15 to-transparent">
+        <div class="text-4xl mb-1">🦅</div>
+        <h2 class="text-xl font-extrabold text-[var(--andes-dark)] font-display">Liga del Cóndor</h2>
+        <p class="text-xs text-[var(--brown)]">Sumá experiencia y subí posiciones esta semana</p>
+      </div>
+      <div id="liga-list" class="px-4 pb-8 flex flex-col gap-2"></div>
+    </div>
+
+    <!-- TAB: PERFIL -->
+    <div id="tab-perfil" class="tab-content flex-1 overflow-y-auto hidden px-5 pt-5 pb-8">
+      <div class="flex flex-col items-center text-center">
+        <div id="perfil-avatar-circle" class="w-20 h-20 rounded-full bg-[var(--gold)]/30 border-4 border-[var(--gold)] flex items-center justify-center text-4xl"></div>
+        <h2 id="perfil-nombre" class="mt-2 text-xl font-extrabold text-[var(--brown-dark)] font-display"></h2>
+        <p id="perfil-dificultad" class="text-xs text-[var(--brown)] font-bold"></p>
+      </div>
+
+      <div class="grid grid-cols-2 gap-3 mt-5">
+        <div class="bg-[var(--cactus)]/10 rounded-2xl p-3 text-center">
+          <div class="text-xl">🗡️</div>
+          <div id="perfil-lanzas" class="font-extrabold text-base font-display">0</div>
+          <div class="text-[10px] text-[var(--brown)] font-bold">Lanzas</div>
+        </div>
+        <div class="bg-[var(--andes)]/10 rounded-2xl p-3 text-center">
+          <div class="text-xl">💎</div>
+          <div id="perfil-gemas" class="font-extrabold text-base font-display">0</div>
+          <div class="text-[10px] text-[var(--brown)] font-bold">Gemas</div>
+        </div>
+        <div class="bg-[var(--clay)]/10 rounded-2xl p-3 text-center">
+          <div class="text-xl">✨</div>
+          <div id="perfil-xp" class="font-extrabold text-base font-display">0</div>
+          <div class="text-[10px] text-[var(--brown)] font-bold">Experiencia</div>
+        </div>
+        <div class="bg-[var(--gold)]/15 rounded-2xl p-3 text-center">
+          <div class="text-xl">🏜️</div>
+          <div id="perfil-record" class="font-extrabold text-base font-display">0m</div>
+          <div class="text-[10px] text-[var(--brown)] font-bold">Récord guanaco</div>
+        </div>
+      </div>
+
+      <div class="mt-5">
+        <label class="block text-xs font-bold text-[var(--brown-dark)] mb-2">Cambiar dificultad</label>
+        <div id="perfil-difficulty-picker" class="grid grid-cols-1 gap-2"></div>
+      </div>
+
+      <button id="btn-reset-progress" class="btn-chunky mt-6 w-full py-3 rounded-2xl text-white font-extrabold text-sm font-display
+        bg-[var(--clay)] border-b-[var(--clay-dark)]">
+        Reiniciar progreso 🔄
+      </button>
+    </div>
+
+    <!-- Navegación inferior -->
+    <nav class="sticky bottom-0 z-30 bg-white border-t border-[var(--sand-dark)] flex justify-around items-center py-2 px-2">
+      <button data-tab="camino" class="tab-btn active-tab flex flex-col items-center gap-0.5 py-1 px-4 rounded-xl font-extrabold text-[11px] text-[var(--brown)]">
+        <span class="tab-icon-wrap w-8 h-8 rounded-full flex items-center justify-center"><span class="w-4 h-4 icon-camino"></span></span>
+        Camino
+      </button>
+      <button data-tab="liga" class="tab-btn flex flex-col items-center gap-0.5 py-1 px-4 rounded-xl font-extrabold text-[11px] text-[var(--brown)]">
+        <span class="tab-icon-wrap w-8 h-8 rounded-full flex items-center justify-center"><span class="w-4 h-4 icon-liga"></span></span>
+        Liga
+      </button>
+      <button data-tab="perfil" class="tab-btn flex flex-col items-center gap-0.5 py-1 px-4 rounded-xl font-extrabold text-[11px] text-[var(--brown)]">
+        <span class="tab-icon-wrap w-8 h-8 rounded-full flex items-center justify-center"><span class="w-4 h-4 icon-perfil"></span></span>
+        Perfil
+      </button>
+    </nav>
+  </section>
+
+  <!-- ======================================================= -->
+  <!-- PANTALLA 3: LECCIÓN INTERACTIVA (Normal / Cuento / IA)   -->
+  <!-- ======================================================= -->
+  <section id="screen-lesson" class="screen flex-col w-full min-h-screen bg-[var(--cream)]">
+    <header class="px-4 pt-4 pb-2 flex items-center gap-3 border-b border-[var(--sand-dark)]">
+      <button id="btn-exit-lesson" class="w-6 h-6 text-[var(--brown)] icon-close"></button>
+      <div class="flex-1 h-3 bg-[var(--sand-dark)] rounded-full overflow-hidden">
+        <div id="lesson-progress-bar" class="h-full bg-[var(--cactus)] rounded-full transition-all duration-300" style="width:0%"></div>
+      </div>
+      <div id="lesson-streak-badge" class="hidden items-center gap-1 font-extrabold text-[var(--gold-dark)] text-sm"><span class="w-4 h-4 icon-streak"></span><span id="lesson-streak-count">0</span></div>
+      <div class="flex items-center gap-1 font-extrabold text-[var(--clay-dark)] text-sm"><span class="w-4 h-4 icon-vidas"></span><span id="lesson-vidas-count">5</span></div>
+    </header>
+
+    <div id="lesson-body" class="flex-1 flex flex-col px-5 pt-4 pb-4 overflow-y-auto"></div>
+
+    <!-- Panel de retroalimentación inferior -->
+    <div id="lesson-feedback-panel" class="hidden px-5 py-4 border-t-2">
+      <div class="flex items-center gap-3 mb-3">
+        <span id="feedback-icon" class="text-3xl"></span>
+        <div>
+          <p id="feedback-title" class="font-extrabold font-display text-lg"></p>
+          <p id="feedback-explain" class="text-sm text-[var(--brown)]"></p>
+        </div>
+      </div>
+      <button id="btn-lesson-continue" class="btn-chunky w-full py-3.5 rounded-2xl text-white font-extrabold font-display"></button>
+    </div>
+  </section>
+
+  <!-- ======================================================= -->
+  <!-- PANTALLA 4: VIDEOLLAMARA CON MARÁ (ANIMADO + EN TIEMPO REAL) -->
+  <!-- ======================================================= -->
+  <section id="screen-videocall" class="screen flex-col w-full min-h-screen bg-slate-900 text-white relative">
+    <!-- Overlay Barra de llamada en vivo -->
+    <header class="p-3 bg-slate-800/90 backdrop-blur flex items-center justify-between border-b border-slate-700 z-10">
+      <div class="flex items-center gap-2">
+        <span class="w-3 h-3 rounded-full bg-red-500 animate-pulse"></span>
+        <span id="vc-call-title" class="font-bold text-xs uppercase tracking-wider text-red-400">En vivo con Mará</span>
+      </div>
+      <div class="text-xs text-slate-300 font-bold" id="vc-step-counter">Pregunta 1 de 3</div>
+      <button id="btn-exit-vc" class="text-slate-400 hover:text-white text-xl px-2 font-bold">✕</button>
+    </header>
+
+    <!-- Marco de Video de Mará -->
+    <div class="flex-1 flex flex-col items-center justify-center p-4 relative overflow-hidden bg-gradient-to-b from-slate-950 to-slate-800">
+      
+      <!-- Fondo Huarpe con imagen pública + capas animadas -->
+      <div class="huarpe-call-bg" aria-hidden="true"></div>
+      <div class="huarpe-petal-layer" aria-hidden="true">
+        <span class="huarpe-petal" style="left:8%;animation-delay:-1s"></span>
+        <span class="huarpe-petal" style="left:22%;animation-delay:-4s"></span>
+        <span class="huarpe-petal" style="left:44%;animation-delay:-2.5s"></span>
+        <span class="huarpe-petal" style="left:67%;animation-delay:-6s"></span>
+        <span class="huarpe-petal" style="left:83%;animation-delay:-3s"></span>
+      </div>
+
+      <!-- Mará: diseño corregido con UNA sola boca -->
+      <div id="vc-mara-container" class="relative z-10 transition-transform duration-300 mara-character">
+        <svg id="vc-mara-svg" width="190" height="190" viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg" class="drop-shadow-2xl" role="img" aria-label="Mará, una mara animada">
+          <defs>
+            <linearGradient id="maraFur" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0" stop-color="#D8B28A"/>
+              <stop offset="1" stop-color="#A9794D"/>
+            </linearGradient>
+            <filter id="maraShadow"><feDropShadow dx="0" dy="4" stdDeviation="3" flood-opacity=".35"/></filter>
+          </defs>
+          <ellipse cx="60" cy="76" rx="45" ry="37" fill="#9B6D45" filter="url(#maraShadow)"/>
+          <path d="M31 47 C12 16 27 2 42 35 L40 49 Z" fill="#805531"/>
+          <path d="M33 42 C20 18 30 11 40 33 L39 43 Z" fill="#D2A679"/>
+          <path d="M89 47 C108 16 93 2 78 35 L80 49 Z" fill="#805531"/>
+          <path d="M87 42 C100 18 90 11 80 33 L81 43 Z" fill="#D2A679"/>
+          <ellipse cx="60" cy="70" rx="35" ry="29" fill="url(#maraFur)"/>
+          <path d="M42 80 Q60 91 78 80 Q60 86 42 80 Z" fill="#F7E9D8" opacity=".9"/>
+          <ellipse cx="46" cy="61" rx="5" ry="6" fill="#24160D" class="mara-eye"/>
+          <ellipse cx="74" cy="61" rx="5" ry="6" fill="#24160D" class="mara-eye"/>
+          <circle cx="47.8" cy="59.5" r="1.8" fill="#FFF"/>
+          <circle cx="75.8" cy="59.5" r="1.8" fill="#FFF"/>
+          <!-- Nariz -->
+          <ellipse cx="60" cy="70" rx="5" ry="3.4" fill="#4A2F1B"/>
+          <!-- ÚNICA boca: el movimiento está acá, no en el hocico -->
+          <path class="mara-mouth-single" d="M52 77 Q60 84 68 77 Q60 82 52 77 Z" fill="#3A2115"/>
+          <path d="M55 79 Q60 81 65 79" stroke="#E8A18C" stroke-width="1.2" fill="none" stroke-linecap="round"/>
+          <circle cx="36" cy="70" r="5" fill="#E88873" opacity=".38"/>
+          <circle cx="84" cy="70" r="5" fill="#E88873" opacity=".38"/>
+        </svg>
+      </div>
+
+      <!-- Nombre / Subtítulos en pantalla -->
+      <div class="z-10 mt-3 text-center max-w-xs">
+        <span class="inline-block px-3 py-1 bg-amber-500/20 text-amber-300 rounded-full text-xs font-bold mb-2">
+          🐹 Mará — Guardián de Cuyo
+        </span>
+        <!-- Globo de diálogo / Subtítulos en tiempo real -->
+        <div id="vc-speech-bubble" class="bg-slate-800/90 border border-slate-700 rounded-2xl p-3 text-sm font-semibold text-slate-100 shadow-lg min-h-[64px] flex items-center justify-center">
+          "¡Hola! Soy Mará. Conectándome..."
+        </div>
+      </div>
+    </div>
+
+    <!-- Panel de respuesta en tiempo real (Teclado/Texto) -->
+    <div class="p-4 bg-slate-800 border-t border-slate-700 flex flex-col gap-2 z-10">
+      <p class="text-xs text-slate-400 font-bold">Escribí tu respuesta a Mará:</p>
+      <form id="vc-answer-form" class="flex gap-2">
+        <input id="vc-user-input" type="text" placeholder="Escribí acá tu respuesta..." autocomplete="off"
+          class="flex-1 bg-slate-900 border border-slate-600 rounded-xl px-4 py-3 text-sm text-white placeholder:text-slate-500 focus:border-amber-400 focus:outline-none">
+        <button type="button" id="btn-vc-mic" class="bg-slate-700 hover:bg-slate-600 text-white font-extrabold px-4 py-3 rounded-xl font-display transition" title="Hablar">🎙️</button>
+        <button type="submit" class="bg-amber-500 hover:bg-amber-600 active:scale-95 text-slate-950 font-extrabold px-5 py-3 rounded-xl font-display transition">
+          Enviar
+        </button>
+      </form>
+      <p class="text-[10px] text-slate-500 text-center">La voz de Mará actualiza el subtítulo mientras habla cuando el navegador expone eventos de palabra.</p>
+    </div>
+  </section>
+
+  <!-- ======================================================= -->
+  <!-- PANTALLA 5: RESULTADO DE LECCIÓN / VIDEOLLAMADA         -->
+  <!-- ======================================================= -->
+  <section id="screen-result" class="screen flex-col w-full min-h-screen items-center justify-center px-8 text-center desert-bg">
+    <div id="result-icon" class="text-7xl mb-3"></div>
+    <h2 id="result-title" class="text-2xl font-extrabold text-[var(--brown-dark)] font-display mb-1"></h2>
+    <p id="result-subtitle" class="text-sm text-[var(--brown)] mb-6"></p>
+    <div id="result-rewards" class="flex gap-4 mb-8"></div>
+    <button id="btn-result-continue" class="btn-chunky w-full max-w-xs py-4 rounded-2xl text-white font-extrabold text-lg font-display
+      bg-[var(--cactus)] border-b-[var(--cactus-dark)]">Continuar</button>
+  </section>
+
+  <!-- ======================================================= -->
+  <!-- PANTALLA 6: MINIJUEGO "CARRERA DEL GUANACO"              -->
+  <!-- ======================================================= -->
+  <section id="screen-game" class="screen flex-col w-full min-h-screen bg-gradient-to-b from-[#F3E3B8] to-[var(--sand)]">
+    <header class="px-4 pt-4 pb-2 flex items-center justify-between">
+      <button id="btn-exit-game" class="w-6 h-6 text-[var(--brown)] icon-close"></button>
+      <h2 class="font-extrabold font-display text-[var(--brown-dark)]">Carrera del Guanaco 🦙</h2>
+      <div class="w-6"></div>
+    </header>
+    <p class="text-center text-xs text-[var(--brown)] px-6 -mt-1 mb-1">Tocá la pantalla para saltar los cactus</p>
+
+    <div id="game-area" class="relative flex-1 mx-4 mb-4 rounded-3xl overflow-hidden border-4 border-[var(--brown)]/30 bg-[#FBF3DD] cursor-pointer select-none">
+      <div class="game-sun-glow"></div>
+      <canvas id="game-canvas" class="absolute inset-0 w-full h-full"></canvas>
+      <div class="absolute top-3 left-3 bg-white/80 rounded-full px-3 py-1 text-sm font-extrabold font-display text-[var(--brown-dark)]">
+        <span id="game-distance">0</span> m
+      </div>
+      <div id="game-start-overlay" class="absolute inset-0 flex flex-col items-center justify-center bg-black/10 text-center px-6">
+        <div class="text-5xl mb-2">🦙</div>
+        <p class="font-extrabold font-display text-lg text-[var(--brown-dark)]">Tocá para empezar</p>
+        <p class="text-xs text-[var(--brown)] mt-1">Corré <b>100 metros</b> para ganar la carrera 🏁</p>
+      </div>
+      <div id="game-over-overlay" class="hidden absolute inset-0 flex flex-col items-center justify-center bg-black/40 text-center px-6">
+        <div id="game-result-icon" class="text-5xl mb-2">🌵💥</div>
+        <p id="game-result-title" class="font-extrabold font-display text-xl text-white">¡Choque con un cactus!</p>
+        <p id="game-over-score" class="text-white text-sm mt-1"></p>
+        <button id="btn-game-retry" class="btn-chunky mt-4 px-6 py-3 rounded-2xl text-white font-extrabold font-display bg-[var(--cactus)] border-b-[var(--cactus-dark)]">Reintentar</button>
+        <button id="btn-game-continue" class="hidden btn-chunky mt-3 w-full max-w-xs px-6 py-3 rounded-2xl text-white font-extrabold font-display bg-[var(--gold-dark)] border-b-[var(--brown-dark)]">Continuar a la siguiente lección ➜</button>
+        <button id="btn-game-finish" class="mt-3 text-white/90 text-sm font-bold underline">Volver al camino</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ======================================================= -->
+  <!-- MODAL: AJUSTES (QoL)                                     -->
+  <!-- ======================================================= -->
+  <div id="settings-overlay" class="hidden fixed inset-0 z-50 bg-black/40 items-end justify-center">
+    <div class="w-full max-w-md bg-[var(--cream)] rounded-t-3xl px-5 pt-4 pb-8 max-h-[85vh] overflow-y-auto">
+      <div class="w-10 h-1.5 bg-[var(--sand-dark)] rounded-full mx-auto mb-4"></div>
+      <h2 class="text-xl font-extrabold text-[var(--brown-dark)] font-display mb-4">Ajustes ⚙️</h2>
+
+      <div class="flex items-center justify-between py-3 border-b border-[var(--sand-dark)]">
+        <div>
+          <p class="font-extrabold text-sm text-[var(--brown-dark)]">Sonido adaptativo</p>
+          <p class="text-[11px] text-[var(--brown)]">Efectos de sonido retroalimentados</p>
+        </div>
+        <button id="toggle-sound" class="toggle-switch" role="switch"></button>
+      </div>
+
+      <div class="flex items-center justify-between py-3 border-b border-[var(--sand-dark)]">
+        <div>
+          <p class="font-extrabold text-sm text-[var(--brown-dark)]">Vibración háptica</p>
+          <p class="text-[11px] text-[var(--brown)]">Vibra al responder o saltar</p>
+        </div>
+        <button id="toggle-haptics" class="toggle-switch" role="switch"></button>
+      </div>
+
+      <div class="flex items-center justify-between py-3">
+        <div>
+          <p class="font-extrabold text-sm text-[var(--brown-dark)]">Modo oscuro</p>
+          <p class="text-[11px] text-[var(--brown)]">Colores suaves nocturnos</p>
+        </div>
+        <button id="toggle-dark" class="toggle-switch" role="switch"></button>
+      </div>
+
+      <div class="mt-3 grid grid-cols-2 gap-2">
+        <button id="btn-pet-change" class="rounded-2xl border-2 border-[var(--sand-dark)] bg-white/70 py-3 text-xs font-extrabold">🦙 Cambiar mascota</button>
+        <button id="btn-ai-new" class="rounded-2xl border-2 border-[var(--sand-dark)] bg-white/70 py-3 text-xs font-extrabold">✨ Nueva lección IA</button>
+      </div>
+      <div class="mt-3 rounded-2xl bg-[var(--sand)] p-3 text-xs font-bold text-[var(--brown)]">
+        <b>Huarprendizaje: Guardianes de Cuyo</b><br>Aprendé con preguntas, historias, misiones, memoria, retos rápidos, escenarios, videollamaras y minijuegos generados dinámicamente.
+      </div>
+      <button id="btn-close-settings" class="btn-chunky mt-6 w-full py-3 rounded-2xl text-white font-extrabold font-display bg-[var(--cactus)] border-b-[var(--cactus-dark)]">Listo</button>
+    </div>
+  </div>
+
+  <!-- OVERLAY CARGA DE IA -->
+  <div id="infinite-loading-overlay" class="hidden fixed inset-0 z-50 bg-[var(--cream)] flex-col items-center justify-center px-8 text-center">
+    <div class="bounce-slow mb-3" id="infinite-loading-mascot"></div>
+    <p class="font-extrabold font-display text-lg text-[var(--brown-dark)]">Generando una lección con IA...</p>
+    <p class="text-xs text-[var(--brown)] mt-1">Creando nuevas historias y preguntas sobre Cuyo ✨</p>
+  </div>
+
+  <div id="companion-pet" role="button" tabindex="0" aria-label="Mascota compañera">🦙</div>
+  <div id="companion-pet-bubble" aria-live="polite"></div>
+
+</div>
+
+<script>
+/* =========================================================================
+   HUARPRENDIZAJE — Código Fuente Completo
+   ========================================================================= */
+
+// --- 0) ICONOS VECTORIALES SVG ---
+const ICONS = {
+  lanzas: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="100%" height="100%"><path d="M14.5 2.5 21 9l-3 3-6.5-6.5z"/><path d="M18 6 4 20"/><path d="M3 21l1.5-4L7 19.5z"/></svg>',
+  gemas: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="100%" height="100%"><path d="M6 3h12l3 5-9 13L3 8z"/><path d="M3 8h18M9 3l-2 5 5 13 5-13-2-5M12 8v13"/></svg>',
+  vidas: '<svg viewBox="0 0 24 24" fill="currentColor" width="100%" height="100%"><path d="M12 21s-7.5-4.6-10-9.2C.4 8.4 2 5 5.5 5c2 0 3.5 1.1 4.5 2.6C11 6.1 12.5 5 14.5 5 18 5 19.6 8.4 22 11.8 19.5 16.4 12 21 12 21z"/></svg>',
+  nivel: '<svg viewBox="0 0 24 24" fill="currentColor" width="100%" height="100%"><path d="M12 2l2.9 6.3 6.9.7-5.2 4.6 1.5 6.8L12 16.9 5.9 20.4l1.5-6.8L2.2 9l6.9-.7z"/></svg>',
+  settings: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="100%" height="100%"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.9-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1-1.6 1.7 1.7 0 0 0-1.9.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.9 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.6-1 1.7 1.7 0 0 0-.3-1.9l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.9.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.9-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.9V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>',
+  camino: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="100%" height="100%"><path d="M4 20c2-5 3-7 3-10a5 5 0 0 1 10 0c0 3 1 5 3 10"/><circle cx="7" cy="10" r="1.4" fill="currentColor"/><circle cx="17" cy="10" r="1.4" fill="currentColor"/><path d="M4 20h16"/></svg>',
+  liga: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="100%" height="100%"><path d="M8 4h8v4a4 4 0 0 1-8 0z"/><path d="M8 5H4v2a3 3 0 0 0 3 3M16 5h4v2a3 3 0 0 1-3 3"/><path d="M12 12v4M9 20h6M10 16h4v4h-4z"/></svg>',
+  perfil: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="100%" height="100%"><circle cx="12" cy="8" r="4"/><path d="M4 20c1.5-4 4.5-6 8-6s6.5 2 8 6"/></svg>',
+  close: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" width="100%" height="100%"><path d="M5 5l14 14M19 5 5 19"/></svg>',
+  streak: '<svg viewBox="0 0 24 24" fill="currentColor" width="100%" height="100%"><path d="M12 2c1 3-2 4-2 7a3 3 0 0 0 6 0c1 1 2 2.5 2 4.5A6.5 6.5 0 0 1 5 13.5C5 8 9 5 12 2z"/></svg>',
+  lock: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="100%" height="100%"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>',
+  check: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" width="100%" height="100%"><path d="M4 12l5 5L20 6"/></svg>',
+  infinity: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="100%" height="100%"><path d="M6 9a3 3 0 1 0 0 6c2.5 0 4.5-2 6-4.5C13.5 8 15.5 6 18 6a3 3 0 1 1 0 6 3 3 0 0 1-2.4-1.2M6 9a3 3 0 0 1 2.4 1.2"/></svg>',
+};
+
+function icon(name){ return ICONS[name] || ''; }
+
+function applyStaticIcons(){
+  const map = {
+    'icon-lanzas':'lanzas', 'icon-gemas':'gemas', 'icon-vidas':'vidas', 'icon-nivel':'nivel',
+    'icon-settings':'settings', 'icon-camino':'camino', 'icon-liga':'liga', 'icon-perfil':'perfil',
+    'icon-close':'close', 'icon-streak':'streak'
+  };
+  Object.keys(map).forEach(cls=>{
+    document.querySelectorAll('.'+cls).forEach(el=>{
+      if(!el.dataset.iconSet){ el.innerHTML = ICONS[map[cls]]; el.dataset.iconSet='1'; }
+    });
+  });
+}
+
+// --- 1) BANCO DE NODO Y BASE EDUCATIVA ---
+const LESSON_NODES = [
+  {
+    id: 1, type: 'lesson', icon: '📖', title: 'Los Huarpes',
+    questions: {
+      basico: [
+        { q:'¿En qué región de Argentina vivían los Huarpes?', options:['Cuyo (Mendoza, San Juan, San Luis)','Patagonia','Litoral','Noroeste'], correct:0, explain:'Habitaron en Cuyo (Mendoza, San Juan y San Luis).' },
+        { q:'¿Qué eran los Huarpes principalmente?', options:['Un pueblo originario de Cuyo','Un imperio europeo','Una tribu del mar','Un ejército antiguo'], correct:0, explain:'Los Huarpes fueron el pueblo originario guardián de Cuyo.' },
+        { q:'¿Cómo se dividían principalmente?', options:['Millcayac y Allentiac','Incas y Mayas','Guanacos y Zorros','Norte y Sur'], correct:0, explain:'Se dividían en Millcayac (Mendoza) y Allentiac (San Juan).' }
+      ]
+    }
+  },
+  {
+    id: 2, type: 'lesson', icon: '💧', title: 'Riego y Acequias',
+    questions: {
+      basico: [
+        { q:'¿Qué construían los Huarpes para llevar agua a sus cultivos?', options:['Acequias (canales)','Puentes gigantes','Torres de agua','Represas de plástico'], correct:0, explain:'Aprovecharon el agua de deshielo mediante acequias.' },
+        { q:'¿De dónde venía el agua de riego?', options:['De la cordillera de los Andes','Del Océano Atlántico','De la lluvia diaria','De pozos subterráneos'], correct:0, explain:'El agua provenía del deshielo de los Andes.' },
+        { q:'¿Qué cultivaban principalmente con el riego?', options:['Maíz, zapallo y quinoa','Café y bananas','Arroz de pantano','Trigo europeo'], correct:0, explain:'El maíz y el zapallo eran la base de su cultivo.' }
+      ]
+    }
+  },
+  { id: 3, type: 'videocall', icon: '📞', title: 'Videollamara' },
+  { id: 4, type: 'minigame', icon: '🏃', title: 'Carrera Guanaco' },
+  {
+    id: 5, type: 'lesson', icon: '🧺', title: 'Cestería y Totora',
+    questions: {
+      basico: [
+        { q:'¿Con qué tejido construían sus balsas y cestos?', options:['Junco y Totora','Lana de oveja','Hilos de seda','Sogas de plástico'], correct:0, explain:'La totora de la Laguna de Huanacache era clave para sus balsas.' },
+        { q:'¿En qué laguna navegaban en balsas de totora?', options:['Laguna de Huanacache','Lago Nahuel Huapi','Mar Chiquita','Laguna del Plata'], correct:0, explain:'Huanacache era el corazón de su comunidad.' },
+        { q:'¿Qué guardaban en sus finas canastas impermeables?', options:['Comida y líquidos como la aloja','Piedras pesadas','Oro y plata','Fuego encendido'], correct:0, explain:'Tejían cestos tan apretados que podían contener líquidos.' }
+      ]
+    }
+  }
+];
+
+// Utilidades de preguntas: se declaran antes de randomizeFixedLessonBank()
+// para que la inicialización de la app no intente llamar funciones inexistentes.
+function cloneQuestion(q){
+  if(!q || typeof q!=='object') return q;
+  return JSON.parse(JSON.stringify(q));
+}
+
+function shuffleArray(arr){
+  const copy=Array.isArray(arr)?arr.slice():[];
+  for(let i=copy.length-1;i>0;i--){
+    const j=Math.floor(Math.random()*(i+1));
+    [copy[i],copy[j]]=[copy[j],copy[i]];
+  }
+  return copy;
+}
+
+function shuffleQuestionOptions(question){
+  const q=cloneQuestion(question);
+  if(!Array.isArray(q?.options) || q.options.length<2 || !Number.isInteger(q.correct)) return q;
+  const correctValue=q.options[q.correct];
+  q.options=shuffleArray(q.options);
+  q.correct=q.options.findIndex(option=>option===correctValue);
+  if(q.correct<0) q.correct=0;
+  return q;
+}
+
+function normalizeLessonQuestions(questions){
+  if(!Array.isArray(questions)) return [];
+  return questions.map(question=>{
+    const q=cloneQuestion(question);
+    if(!q || typeof q!=='object') return q;
+    // Las preguntas de opción múltiple necesitan que el índice correcto
+    // acompañe a la opción cuando se mezclan las respuestas.
+    if(Array.isArray(q.options) && Number.isInteger(q.correct)){
+      const normalized=shuffleQuestionOptions(q);
+      return normalized;
+    }
+    // Compatibilidad con formatos especiales de las lecciones IA.
+    if(q.type==='multi' && Array.isArray(q.options) && Number.isInteger(q.correct)){
+      return shuffleQuestionOptions(q);
+    }
+    return q;
+  });
+}
+
+// Todas las preguntas del contenido fijo pasan por este normalizador una sola vez.
+// Así la respuesta correcta deja de quedar sistemáticamente arriba.
+function randomizeFixedLessonBank(){
+  LESSON_NODES.forEach(node=>{
+    if(!node.questions)return;
+    Object.keys(node.questions).forEach(diff=>{
+      node.questions[diff]=normalizeLessonQuestions(node.questions[diff]);
+    });
+  });
+}
+
+const LEAGUE_RIVALS = [
+  { name:'Cóndor Currú', avatar:'🦅' }, { name:'Puma Malal', avatar:'🐾' },
+  { name:'Zorro Pillán', avatar:'🦊' }, { name:'Yastay Runa', avatar:'🦙' },
+  { name:'Ñandú Veloz', avatar:'🪶' }
+];
+
+const AVATARS = ['🦅','🦙','🏺','🌿'];
+const DIFFICULTIES = [
+  { id:'basico', label:'Básico', desc:'Ideal para empezar', color:'cactus' },
+  { id:'intermedio', label:'Intermedio', desc:'Conocimiento medio', color:'gold' },
+  { id:'avanzado', label:'Avanzado', desc:'Desafío para expertos', color:'clay' }
+];
+
+// --- 2) ESTADO Y PERSISTENCIA ---
+const STORAGE_KEY = 'huarprendizaje_state_v2';
+
+function defaultState(){
+  return {
+    name: '', avatar: AVATARS[0], difficulty: 'basico',
+    xp: 0, lanzas: 10, gemas: 3, vidas: 5,
+    progress: {},
+    guanacoRecord: 0,
+    onboarded: false,
+    soundOn: true,
+    hapticsOn: true,
+    darkMode: false,
+    infiniteNodes: [] // Almacena lecciones generadas infinitas por IA
+  };
+}
+
+let state = loadState();
+
+function loadState(){
+  try{
+    const raw = localStorage.getItem(STORAGE_KEY);
+    return raw ? Object.assign(defaultState(), JSON.parse(raw)) : defaultState();
+  }catch(e){ return defaultState(); }
+}
+function saveState(){ localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }
+function currentLevel(){ return Math.floor(state.xp / 100) + 1; }
+
+// --- 3) EFECTOS DE SONIDO Y VOZ (Web Audio & Speech) ---
+let audioCtx = null;
+function getAudioCtx(){
+  if(!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  if(audioCtx.state === 'suspended') audioCtx.resume();
+  return audioCtx;
+}
+function playTone(freq, start, duration, type='sine', gainPeak=0.15){
+  if(!state.soundOn) return;
+  try{
+    const ctx = getAudioCtx();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.type = type;
+    osc.frequency.setValueAtTime(freq, ctx.currentTime + start);
+    gain.gain.setValueAtTime(0, ctx.currentTime + start);
+    gain.gain.linearRampToValueAtTime(gainPeak, ctx.currentTime + start + 0.01);
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + start + duration);
+    osc.connect(gain).connect(ctx.destination);
+    osc.start(ctx.currentTime + start);
+    osc.stop(ctx.currentTime + start + duration + 0.02);
+  }catch(e){}
+}
+function sfxCorrect(){ playTone(523,0,0.1); playTone(659,0.08,0.12); playTone(784,0.16,0.18); haptic(15); }
+function sfxWrong(){ playTone(180,0,0.18,'sawtooth'); playTone(120,0.1,0.22,'sawtooth'); haptic([40,40]); }
+function sfxJump(){ playTone(300,0,0.05,'square'); playTone(500,0.04,0.07,'square'); haptic(8); }
+function sfxClick(){ playTone(440,0,0.04,'square',0.05); haptic(5); }
+function haptic(pat){ if(state.hapticsOn && navigator.vibrate){ try{ navigator.vibrate(pat); }catch(e){} } }
+
+// Síntesis de Voz para Mará
+let maraSpeechToken = 0;
+let maraBoundaryTimer = null;
+
+function setLiveSubtitle(text, finalText=false){
+  const bubble=document.getElementById('vc-speech-bubble');
+  if(!bubble) return;
+  bubble.textContent = finalText ? `"${text}"` : text;
+}
+
+function clearMaraSpeechVisuals(){
+  const maraContainer=document.getElementById('vc-mara-container');
+  if(maraContainer) maraContainer.classList.remove('mara-speaking');
+  if(maraBoundaryTimer){clearTimeout(maraBoundaryTimer);maraBoundaryTimer=null;}
+}
+
+function speakMaraText(text,onEndCallback){
+  const token=++maraSpeechToken;
+  clearMaraSpeechVisuals();
+  if(!('speechSynthesis' in window)){
+    setLiveSubtitle(text,true);
+    window.setTimeout(()=>{if(token===maraSpeechToken&&onEndCallback)onEndCallback();},Math.max(900,text.length*38));
+    return;
+  }
+  try{window.speechSynthesis.cancel();}catch(e){}
+  const utt=new SpeechSynthesisUtterance(text);
+  utt.lang='es-AR';
+  utt.rate=1.0;
+  utt.pitch=1.12;
+  const maraContainer=document.getElementById('vc-mara-container');
+  if(maraContainer)maraContainer.classList.add('mara-speaking');
+  setLiveSubtitle('',false);
+
+  let boundarySupported=false;
+  utt.onboundary=(event)=>{
+    if(token!==maraSpeechToken)return;
+    boundarySupported=true;
+    const start=typeof event.charIndex==='number'?event.charIndex:0;
+    const count=typeof event.charLength==='number'&&event.charLength>0?event.charLength:Math.max(1, text.slice(start).search(/\s/));
+    const spoken=text.slice(0,Math.max(0,start+count));
+    setLiveSubtitle(spoken,false);
+  };
+  utt.onstart=()=>{
+    if(token!==maraSpeechToken)return;
+    const status=document.getElementById('vc-live-status');
+    if(status)status.textContent='● Voz y subtítulos sincronizados';
+    setLiveSubtitle('',false);
+  };
+  utt.onend=()=>{
+    if(token!==maraSpeechToken)return;
+    clearMaraSpeechVisuals();
+    setLiveSubtitle(text,true);
+    const status=document.getElementById('vc-live-status');
+    if(status)status.textContent=boundarySupported?'Subtítulos sincronizados':'Subtítulos estimados en tiempo real';
+    if(onEndCallback)onEndCallback();
+  };
+  utt.onerror=()=>{
+    if(token!==maraSpeechToken)return;
+    clearMaraSpeechVisuals();
+    setLiveSubtitle(text,true);
+    if(onEndCallback)onEndCallback();
+  };
+  window.speechSynthesis.speak(utt);
+}
+
+// --- 4) NAVEGACIÓN DE PANTALLAS ---
+function showScreen(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+function showTab(tabId){
+  document.querySelectorAll('.tab-content').forEach(t=>t.classList.add('hidden'));
+  document.getElementById('tab-'+tabId).classList.remove('hidden');
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.toggle('active-tab', b.dataset.tab===tabId));
+  if(tabId==='liga') renderLeague();
+  if(tabId==='perfil') renderProfile();
+  if(tabId==='camino') renderPath();
+}
+
+// --- 5) BIENVENIDA & PERFIL INICIAL ---
+function initWelcomeScreen(){
+  document.getElementById('huarpi-mascot-welcome').innerHTML = `
+    <svg width="90" height="90" viewBox="0 0 110 110">
+      <ellipse cx="55" cy="60" rx="42" ry="38" fill="#C89B6F"/>
+      <ellipse cx="55" cy="63" rx="30" ry="26" fill="#EFD9B4"/>
+      <circle cx="40" cy="50" r="6" fill="#3A2A1C"/>
+      <circle cx="70" cy="50" r="6" fill="#3A2A1C"/>
+      <path d="M40 68 Q55 82 70 68" stroke="#4A2C18" stroke-width="4" fill="none" stroke-linecap="round"/>
+    </svg>`;
+
+  const avatarPicker = document.getElementById('avatar-picker');
+  avatarPicker.innerHTML = AVATARS.map(a=>`<button data-avatar="${a}" class="avatar-option text-2xl py-2 rounded-2xl border-2 border-[var(--sand-dark)] bg-white">${a}</button>`).join('');
+  avatarPicker.querySelectorAll('.avatar-option').forEach(btn=>{
+    btn.onclick = ()=>{
+      sfxClick(); state.avatar = btn.dataset.avatar;
+      avatarPicker.querySelectorAll('.avatar-option').forEach(b=>b.classList.remove('selected'));
+      btn.classList.add('selected');
+    };
+  });
+  avatarPicker.children[0].classList.add('selected');
+
+  const diffPicker = document.getElementById('difficulty-picker');
+  diffPicker.innerHTML = DIFFICULTIES.map(d=>`
+    <button data-diff="${d.id}" class="diff-card btn-chunky flex items-center justify-between text-left px-4 py-2.5 rounded-2xl text-white font-display bg-[var(--${d.color})] border-b-[var(--${d.color}-dark)]">
+      <span><span class="block font-extrabold text-sm">${d.label}</span><span class="block text-xs opacity-90 font-sans">${d.desc}</span></span>
+      <span class="text-xl">${d.id==='basico'?'🌱':d.id==='intermedio'?'🌵':'🔥'}</span>
+    </button>`).join('');
+  diffPicker.querySelectorAll('.diff-card').forEach(btn=>{
+    btn.onclick = ()=>{
+      sfxClick(); state.difficulty = btn.dataset.diff;
+      diffPicker.querySelectorAll('.diff-card').forEach(b=>b.classList.remove('selected'));
+      btn.classList.add('selected');
+    };
+  });
+
+  document.getElementById('btn-start-app').onclick = ()=>{
+    getAudioCtx();
+    state.name = document.getElementById('input-username').value.trim() || 'Viajero de Cuyo';
+    state.onboarded = true;
+    saveState();
+    sfxCorrect();
+    enterMainApp();
+  };
+}
+
+function enterMainApp(){
+  showScreen('screen-app');
+  showTab('camino');
+  updateTopBar();
+  setupScrollArrow();
+}
+
+function updateTopBar(){
+  document.getElementById('stat-lanzas').textContent = state.lanzas;
+  document.getElementById('stat-gemas').textContent = state.gemas;
+  document.getElementById('stat-vidas').textContent = state.vidas;
+  document.getElementById('stat-nivel').textContent = 'Nivel ' + currentLevel();
+}
+
+// --- 6) CAMINO PRINCIPAL & GENERADOR DE LECCIONES IA INFINITAS ---
+const PATH_OFFSETS = [0, 50, 80, 50, 0, -50, -80, -50];
+
+function renderPath(){
+  const container = document.getElementById('path-container');
+  container.innerHTML = '';
+
+  // 1. Renderizar Nodos Fijos
+  LESSON_NODES.forEach((node, i)=>{
+    const unlocked = i === 0 || !!(state.progress[LESSON_NODES[i-1].id]?.completed);
+    const completed = !!(state.progress[node.id]?.completed);
+    const offset = PATH_OFFSETS[i % PATH_OFFSETS.length];
+
+    const wrap = document.createElement('div');
+    wrap.className = 'flex flex-col items-center';
+    wrap.style.transform = `translateX(${offset}px)`;
+
+    let circleBg = completed ? 'bg-[var(--cactus)] border-[var(--cactus-dark)]' : unlocked ? 'bg-[var(--clay)] border-[var(--clay-dark)]' : 'bg-[var(--sand-dark)] border-[#D8C79E]';
+    if(node.type === 'videocall') circleBg = unlocked ? 'bg-amber-500 border-amber-700' : circleBg;
+
+    wrap.innerHTML = `
+      <button class="path-node relative w-16 h-16 rounded-full flex items-center justify-center text-2xl shadow-md border-4 text-white ${circleBg} ${unlocked && !completed ? 'pulse-ring' : ''}" ${unlocked ? '' : 'disabled'}>
+        ${unlocked ? node.icon : icon('lock')}
+        ${completed ? `<span class="absolute -top-1 -right-1 w-5 h-5 text-[var(--cactus-dark)] bg-white rounded-full p-0.5 shadow">${icon('check')}</span>` : ''}
+      </button>
+      <p class="mt-1 text-xs font-extrabold text-center max-w-[90px] ${unlocked ? 'text-[var(--brown-dark)]' : 'text-[var(--brown)]/40'}">${node.title}</p>
+    `;
+    container.appendChild(wrap);
+
+    if(unlocked){
+      wrap.querySelector('button').onclick = ()=>{
+        sfxClick();
+        if(node.type === 'videocall') openMaraVideoCall();
+        else if(node.type === 'minigame') openMinigame(node.id);
+        else openLesson(node.id);
+      };
+    }
+  });
+
+  // 2. Renderizar Nodos Infinitos de IA Generados
+  state.infiniteNodes.forEach((iNode, j)=>{
+    const idx = LESSON_NODES.length + j;
+    const offset = PATH_OFFSETS[idx % PATH_OFFSETS.length];
+    const prevCompleted = j === 0 ? state.progress[LESSON_NODES[LESSON_NODES.length-1].id]?.completed : state.infiniteNodes[j-1].completed;
+    const unlocked = !!prevCompleted;
+    const completed = !!iNode.completed;
+
+    const wrap = document.createElement('div');
+    wrap.className = 'flex flex-col items-center';
+    wrap.style.transform = `translateX(${offset}px)`;
+
+    const nodeBg = completed ? 'bg-[var(--gold)] border-[var(--gold-dark)]' : unlocked ? 'bg-[var(--andes)] border-[var(--andes-dark)]' : 'bg-[var(--sand-dark)] border-[#D8C79E]';
+
+    wrap.innerHTML = `
+      <button class="path-node relative w-16 h-16 rounded-full flex items-center justify-center text-2xl shadow-md border-4 text-white ${nodeBg} ${unlocked && !completed ? 'pulse-ring' : ''}" ${unlocked ? '' : 'disabled'}>
+        ${iNode.icon || '✨'}
+        ${completed ? `<span class="absolute -top-1 -right-1 w-5 h-5 text-[var(--gold-dark)] bg-white rounded-full p-0.5 shadow">${icon('check')}</span>` : ''}
+      </button>
+      <p class="mt-1 text-xs font-extrabold text-center max-w-[100px] ${unlocked ? 'text-[var(--brown-dark)]' : 'text-[var(--brown)]/40'}">${iNode.title}</p>
+    `;
+    container.appendChild(wrap);
+
+    if(unlocked){
+      wrap.querySelector('button').onclick = ()=>{
+        sfxClick();
+        if(iNode.type==='videocall') openAiVideollamara(iNode);
+        else if(iNode.type==='minigame') openAiMinigame(iNode);
+        else beginLessonForNode(iNode);
+      };
+    }
+  });
+
+  // 3. Botón para Generar Nueva Lección de IA
+  const lastFixedDone = state.progress[LESSON_NODES[LESSON_NODES.length-1].id]?.completed;
+  const lastInfiniteDone = state.infiniteNodes.length === 0 || state.infiniteNodes[state.infiniteNodes.length-1].completed;
+
+  if(lastFixedDone && lastInfiniteDone){
+    const idx = LESSON_NODES.length + state.infiniteNodes.length;
+    const offset = PATH_OFFSETS[idx % PATH_OFFSETS.length];
+    const genWrap = document.createElement('div');
+    genWrap.className = 'flex flex-col items-center';
+    genWrap.style.transform = `translateX(${offset}px)`;
+    genWrap.innerHTML = `
+      <button id="btn-generate-ai-lesson" class="path-node relative w-16 h-16 rounded-full flex items-center justify-center text-2xl shadow-md bg-gradient-to-br from-[var(--andes)] to-[var(--gold)] border-4 border-white text-white pulse-ring">
+        ✨
+      </button>
+      <p class="mt-1 text-xs font-extrabold text-center text-[var(--brown-dark)]">Lección de IA</p>
+    `;
+    container.appendChild(genWrap);
+    document.getElementById('btn-generate-ai-lesson').onclick = ()=>{ sfxClick(); generateAILesson(); };
+  }
+}
+
+// Generador de Lecciones IA: usa varios formatos y baraja las respuestas.
+const AI_LESSON_TYPES = [
+  'normal','cuento','mision','verdadero_falso','completar','ordenar','relacionar',
+  'seleccion_multiple','memoria','desafio_rapido','escenario','vocabulario',
+  'videocall','minigame','flash','debate','exploracion'
+];
+
+const AI_TITLE_TEMPLATES = [
+  'Misión: {topic}','El desafío de {topic}','Descubrí {topic}','Guardianes de {topic}',
+  'La aventura de {topic}','Exploradores de Cuyo: {topic}','Reto IA: {topic}'
+];
+
+function aiTopicLabel(source){
+  const labels={agua:'el agua y las acequias',cesteria:'la cestería y la totora',fauna:'la fauna de Cuyo',cultura:'la cultura Huarpe',vida:'la vida cotidiana Huarpe'};
+  return labels[source.topic]||source.title.toLowerCase();
+}
+function aiGeneratedTitle(source,type){
+  const base=aiTopicLabel(source);
+  const t=AI_TITLE_TEMPLATES[Math.floor(Math.random()*AI_TITLE_TEMPLATES.length)].replace('{topic}',base);
+  const prefix={videocall:'📞 ',minigame:'🎮 ',flash:'⚡ ',debate:'💬 ',exploracion:'🧭 '}[type]||'';
+  return prefix+t;
+}
+function aiQuestionFrom(base,type,index=0){
+  const stems={
+    normal:['¿Qué aprendiste sobre','¿Cuál es la idea principal de','¿Cómo explicarías'],
+    cuento:['En esta historia, ¿qué ocurrió con','¿Qué decisión tomó el personaje sobre','¿Qué enseñanza deja'],
+    mision:['Misión: resolvé este problema sobre','¿Qué harías para proteger','Elegí la mejor estrategia para'],
+    flash:['⚡ Rápido: ¿qué recordás sobre','En 5 segundos, ¿qué sabés de','Respuesta relámpago sobre'],
+    debate:['¿Qué opinás sobre','¿Por qué podría ser importante','¿Qué argumento darías sobre'],
+    exploracion:['🔎 Explorá: ¿qué relación hay entre','¿Qué detalle investigarías sobre','¿Qué descubrimiento harías sobre']
+  };
+  const list=stems[type]||stems.normal;
+  const stem=list[index%list.length];
+  return `${stem} ${base.q.replace(/^¿|\?$/g,'')}?`;
+}
+
+function makeAiLessonFromBank(){
+  const source=AI_CONTENT_BANK[Math.floor(Math.random()*AI_CONTENT_BANK.length)];
+  const type=AI_LESSON_TYPES[Math.floor(Math.random()*AI_LESSON_TYPES.length)];
+  const id='ia_'+Date.now()+'_'+Math.floor(Math.random()*9999);
+  const base=normalizeLessonQuestions(source.facts.map(row=>({q:row[0],options:row[1],correct:row[2],explain:row[3]})));
+  const generatedTitle=aiGeneratedTitle(source,type);
+  let questions=[];
+
+  if(type==='videocall'){
+    questions=base.slice(0,3).map((q,i)=>({prompt:aiQuestionFrom(q,'normal',i),keywords:[String(q.options[q.correct]).toLowerCase(),...(String(q.options[q.correct]).toLowerCase().split(' '))],correctMsg:'¡Bien! '+q.explain,wrongMsg:'Buena tentativa. '+q.explain}));
+    return {id,title:generatedTitle,icon:'📞',type:'videocall',questions,aiGenerated:true,topic:source.topic,completed:false,aiQuestion:questions[0]?.prompt||'Hablemos de Cuyo.'};
+  }
+  if(type==='minigame'){
+    const q=base[Math.floor(Math.random()*base.length)];
+    return {id,title:generatedTitle,icon:'🎮',type:'minigame',questions:[{prompt:aiQuestionFrom(q,'normal'),options:q.options,correct:q.correct,explain:q.explain}],gamePrompt:aiQuestionFrom(q,'normal'),aiGenerated:true,topic:source.topic,completed:false};
+  }
+  if(type==='verdadero_falso') questions=base.slice(0,3).map((q,i)=>({type:'truefalse',q:aiQuestionFrom(q,'normal',i),statement:`${q.options[q.correct]} es la respuesta relacionada con el tema.`,options:['Verdadero','Falso'],correct:0,explain:q.explain}));
+  else if(type==='completar') questions=base.slice(0,3).map(q=>({type:'fill',q:aiQuestionFrom(q,'normal'),answer:q.options[q.correct],correctText:q.options[q.correct],explain:q.explain}));
+  else if(type==='ordenar') questions=[{type:'order',q:'Ordená una secuencia lógica para cuidar el agua en Cuyo.',items:['Observar el canal','Retirar obstáculos','Comprobar el paso del agua','Mantenerlo limpio'],explain:'El orden representa una secuencia de cuidado del agua.'}];
+  else if(type==='relacionar') questions=[{type:'match',q:'Relacioná cada elemento con su función o significado.',pairs:[['Acequia','Conduce agua'],['Totora','Material vegetal'],['Guanaco','Fauna nativa'],['Algarrobo','Recurso vegetal']],explain:'Relacionar conceptos refuerza la memoria.'}];
+  else if(type==='seleccion_multiple') questions=base.slice(0,2).map(q=>({type:'multi',q:aiQuestionFrom(q,'normal'),prompt:q.q,options:q.options,correctMany:[q.correct],explain:q.explain}));
+  else if(type==='memoria') questions=[{type:'memory',q:'Encontrá las parejas de conceptos.',cards:shuffleArray(['Acequia','Agua','Totora','Cestería','Guanaco','Fauna','Algarrobo','Fruto']),explain:'La memoria visual refuerza el vocabulario.'}];
+  else if(type==='desafio_rapido'||type==='flash') questions=base.slice(0,3).map(q=>({...q,type:'quick',q:aiQuestionFrom(q,'flash'),timeLimit:9000}));
+  else if(type==='escenario'||type==='mision') questions=[{type:'scenario',q:'Una comunidad necesita cuidar un recurso de Cuyo. ¿Qué decisión ayuda más?',options:['Organizar el cuidado comunitario','Ignorar el problema','Dañar el recurso','Desperdiciarlo'],correct:0,explain:'El cuidado comunitario favorece la conservación.'}];
+  else if(type==='vocabulario') questions=base.slice(0,3).map(q=>({type:'vocab',q:aiQuestionFrom(q,'normal'),definition:q.q,options:q.options,correct:q.correct,explain:q.explain}));
+  else if(type==='cuento'||type==='debate'||type==='exploracion'||type==='normal') questions=base.slice(0,3).map((q,i)=>({...q,q:aiQuestionFrom(q,type,i)}));
+
+  return {id,title:generatedTitle,icon:source.icon,type,questions,aiGenerated:true,topic:source.topic,completed:false,aiQuestion:questions[0]?.q||questions[0]?.prompt||'¿Qué aprendiste?',generatedAt:new Date().toISOString()};
+}
+
+randomizeFixedLessonBank();
+
+function generateAILesson(){
+  const overlay=document.getElementById('infinite-loading-overlay');
+  overlay.classList.remove('hidden');
+  overlay.classList.add('flex');
+  window.setTimeout(()=>{
+    const newLesson=makeAiLessonFromBank();
+    state.infiniteNodes.push(newLesson);
+    saveState();
+    overlay.classList.remove('flex');
+    overlay.classList.add('hidden');
+    renderPath();
+    beginLessonForNode(newLesson);
+  },650);
+}
+
+// --- 7) FLECHA DE NAVEGACIÓN FLOTANTE (IR ABAJO / ARRIBA) ---
+function setupScrollArrow(){
+  const tabCamino = document.getElementById('tab-camino');
+  const btnArrow = document.getElementById('btn-scroll-arrow');
+  const arrowIcon = document.getElementById('arrow-icon');
+
+  tabCamino.onscroll = ()=>{
+    const isAtBottom = tabCamino.scrollTop + tabCamino.clientHeight >= tabCamino.scrollHeight - 50;
+    if(isAtBottom){
+      arrowIcon.textContent = '👆';
+      btnArrow.title = 'Ir arriba';
+    } else {
+      arrowIcon.textContent = '👇';
+      btnArrow.title = 'Ir abajo';
+    }
+  };
+
+  btnArrow.onclick = ()=>{
+    sfxClick();
+    const isAtBottom = tabCamino.scrollTop + tabCamino.clientHeight >= tabCamino.scrollHeight - 50;
+    if(isAtBottom){
+      tabCamino.scrollTo({ top: 0, behavior: 'smooth' });
+    } else {
+      tabCamino.scrollTo({ top: tabCamino.scrollHeight, behavior: 'smooth' });
+    }
+  };
+}
+
+// --- 8) VIDEOLLAMADA EN TIEMPO REAL CON MARÁ ---
+let currentVcIndex = 0;
+const VC_QUESTIONS = [
+  { prompt: '¡Hola! Qué alegría hablar con vos. Decime, ¿sabés cómo se llama la región argentina donde vivían los Huarpes?', keywords: ['cuyo', 'mendoza', 'san juan', 'san luis'], correctMsg: '¡Exacto! La hermosa región de Cuyo.', wrongMsg: '¡Cerca! Es en la región de Cuyo (Mendoza, San Juan y San Luis).' },
+  { prompt: '¡Muy bien! Y para cultivar en el desierto, construían canales de agua... ¿Cómo se llaman esos canales?', keywords: ['acequia', 'acequias', 'canal', 'canales'], correctMsg: '¡Excelente! Las famosas acequias.', wrongMsg: 'Se llaman acequias, ¡canales fundamentales para el riego!' },
+  { prompt: 'Última pregunta: ¿Qué árbol de Cuyo da un fruto con el que se hace el rico pan llamado patay?', keywords: ['algarrobo', 'algarroba'], correctMsg: '¡Súper bien! El sagrado Algarrobo.', wrongMsg: 'Es el Algarrobo, un árbol vital para nuestro pueblo.' }
+];
+
+function openMaraVideoCall(){
+  window.activeAiCall=null;
+  document.getElementById('vc-call-title').textContent='En vivo con Mará';
+  currentVcIndex = 0;
+  showScreen('screen-videocall');
+  document.getElementById('vc-step-counter').textContent = `Pregunta 1 de ${VC_QUESTIONS.length}`;
+  triggerVcQuestion();
+}
+
+function triggerVcQuestion(){
+  if(currentVcIndex >= VC_QUESTIONS.length){
+    // Finalizar Videollamara con éxito
+    state.xp += 40;
+    state.lanzas += 10;
+    state.gemas += 2;
+    state.progress[3] = { completed: true };
+    saveState();
+
+    sfxCorrect();
+    document.getElementById('result-icon').textContent = '📞✨';
+    document.getElementById('result-title').textContent = '¡Videollamara completada!';
+    document.getElementById('result-subtitle').textContent = 'Mará quedó muy feliz de conversar con vos sobre Cuyo.';
+    document.getElementById('result-rewards').innerHTML = `
+      <div class="bg-white/80 rounded-2xl px-4 py-2 font-extrabold text-[var(--brown-dark)]">🗡️ +10</div>
+      <div class="bg-white/80 rounded-2xl px-4 py-2 font-extrabold text-[var(--andes-dark)]">💎 +2</div>
+      <div class="bg-white/80 rounded-2xl px-4 py-2 font-extrabold text-[var(--gold-dark)]">✨ +40 XP</div>
+    `;
+    showScreen('screen-result');
+    document.getElementById('btn-result-continue').onclick = ()=>{ enterMainApp(); };
+    return;
+  }
+
+  const qData = VC_QUESTIONS[currentVcIndex];
+  document.getElementById('vc-step-counter').textContent = `Pregunta ${currentVcIndex + 1} de ${VC_QUESTIONS.length}`;
+  document.getElementById('vc-speech-bubble').textContent = `"${qData.prompt}"`;
+  document.getElementById('vc-user-input').value = '';
+
+  speakMaraText(qData.prompt);
+}
+
+document.getElementById('vc-answer-form').onsubmit = (e)=>{
+  e.preventDefault();
+  const input = document.getElementById('vc-user-input').value.trim().toLowerCase();
+  if(!input) return;
+
+  if(window.activeAiCall){
+    const qData=window.activeAiCall.questions[currentVcIndex];
+    const isCorrect=qData.keywords.some(kw=>input.includes(kw));
+    const reply=isCorrect?qData.correctMsg:qData.wrongMsg;
+    if(isCorrect)sfxCorrect();else sfxWrong();
+    document.getElementById('vc-speech-bubble').textContent='"'+reply+'"';
+    speakMaraText(reply,()=>{currentVcIndex++;setTimeout(triggerAiVideollamaraQuestion,650);});
+    return;
+  }
+  const qData = VC_QUESTIONS[currentVcIndex];
+  const isCorrect = qData.keywords.some(kw => input.includes(kw));
+
+  if(isCorrect){
+    sfxCorrect();
+    document.getElementById('vc-speech-bubble').textContent = `"${qData.correctMsg}"`;
+    speakMaraText(qData.correctMsg, ()=>{
+      currentVcIndex++;
+      setTimeout(triggerVcQuestion, 800);
+    });
+  } else {
+    sfxWrong();
+    document.getElementById('vc-speech-bubble').textContent = `"${qData.wrongMsg}"`;
+    speakMaraText(qData.wrongMsg, ()=>{
+      currentVcIndex++;
+      setTimeout(triggerVcQuestion, 800);
+    });
+  }
+};
+
+const VoiceRecognition=window.SpeechRecognition||window.webkitSpeechRecognition;
+if(VoiceRecognition){
+  const vcRecognition=new VoiceRecognition(); vcRecognition.lang='es-AR'; vcRecognition.interimResults=false; vcRecognition.maxAlternatives=1;
+  vcRecognition.onstart=()=>{document.getElementById('vc-mara-container')?.classList.add('vc-user-speaking');document.getElementById('btn-vc-mic').textContent='🔴';};
+  vcRecognition.onend=()=>{document.getElementById('vc-mara-container')?.classList.remove('vc-user-speaking');document.getElementById('btn-vc-mic').textContent='🎙️';};
+  vcRecognition.onresult=e=>{const text=e.results[0][0].transcript;document.getElementById('vc-user-input').value=text;document.getElementById('vc-answer-form').requestSubmit();};
+  vcRecognition.onerror=()=>{document.getElementById('vc-mara-container')?.classList.remove('vc-user-speaking');};
+  document.getElementById('btn-vc-mic').onclick=()=>{try{vcRecognition.start();}catch(e){}};
+}else{document.getElementById('btn-vc-mic').onclick=()=>announce('El reconocimiento de voz no está disponible en este navegador.');}
+
+document.getElementById('btn-exit-vc').onclick = ()=>{
+  if('speechSynthesis' in window) window.speechSynthesis.cancel();
+  window.activeAiCall=null;
+  document.getElementById('vc-call-title').textContent='En vivo con Mará';
+  enterMainApp();
+};
+
+// --- 9) CUESTIONARIOS Y LECCIONES INTERACTIVAS ---
+let currentLessonState=null;
+
+function openLesson(nodeId){
+  const node=LESSON_NODES.find(n=>n.id===nodeId);
+  if(!node)return;
+  const questions=node.questions[state.difficulty]||node.questions.basico||[];
+  beginLessonForNode({id:node.id,title:node.title,questions,type:'normal'});
+}
+
+function beginLessonForNode(lessonObj){
+  currentLessonState={
+    id:lessonObj.id,
+    title:lessonObj.title,
+    type:lessonObj.type||'normal',
+    questions:normalizeLessonQuestions(lessonObj.questions||[]),
+    currentIndex:0,
+    streak:0,
+    vidas:state.vidas>0?state.vidas:1,
+    memoryState:null,
+    answered:false,
+    startedAt:performance.now()
+  };
+  showScreen('screen-lesson');
+  renderCurrentQuestion();
+}
+
+function lessonQuestionProgress(){
+  const ls=currentLessonState;
+  const total=Math.max(1,ls.questions.length);
+  return Math.round((ls.currentIndex/total)*100);
+}
+
+function setLessonBody(html){
+  const title=currentLessonState?.title||'Lección';
+  document.getElementById('lesson-body').innerHTML=`<div class="mb-2 text-center text-xs font-extrabold text-[var(--andes-dark)] ai-generated-title">${escapeHtml(title)}</div>`+html;
+  document.getElementById('lesson-feedback-panel').classList.add('hidden');
+}
+
+function renderCurrentQuestion(){
+  const ls=currentLessonState;
+  const q=ls.questions[ls.currentIndex];
+  if(!q){finishLesson(true);return;}
+  document.getElementById('lesson-progress-bar').style.width=lessonQuestionProgress()+'%';
+  document.getElementById('lesson-vidas-count').textContent=ls.vidas;
+  document.getElementById('lesson-streak-count').textContent=ls.streak;
+  document.getElementById('lesson-streak-badge').classList.toggle('hidden',ls.streak<2);
+
+  if(q.type==='fill')return renderFillQuestion(q);
+  if(q.type==='order')return renderOrderQuestion(q);
+  if(q.type==='match')return renderMatchQuestion(q);
+  if(q.type==='multi')return renderMultiQuestion(q);
+  if(q.type==='memory')return renderMemoryQuestion(q);
+  if(q.type==='quick')return renderQuickQuestion(q);
+  if(q.type==='truefalse')return renderTrueFalseQuestion(q);
+  renderChoiceQuestion(q);
+}
+
+function lessonHeader(label,emoji){
+  return `<div class="lesson-type-badge">${emoji} ${label}</div>`;
+}
+
+function renderChoiceQuestion(q){
+  const options=shuffleQuestionOptions(cloneQuestion(q));
+  q.options=options.options;q.correct=options.correct;
+  setLessonBody(`
+    <div class="flex-1 flex flex-col justify-center">
+      ${lessonHeader('Pregunta interactiva','🧠')}
+      <h3 class="text-xl font-extrabold text-[var(--brown-dark)] font-display mb-6 text-center leading-snug">${q.q}</h3>
+      <div class="grid grid-cols-1 gap-3">
+        ${q.options.map((opt,i)=>`<button data-idx="${i}" class="lesson-option btn-option btn-chunky w-full py-3.5 px-4 rounded-2xl border-2 border-[var(--sand-dark)] bg-white text-[var(--brown-dark)] font-bold text-base text-left shadow-sm">${opt}</button>`).join('')}
+      </div>
+    </div>`);
+  document.querySelectorAll('.btn-option').forEach(btn=>btn.onclick=()=>checkAnswer(Number(btn.dataset.idx),q));
+}
+
+function renderTrueFalseQuestion(q){
+  setLessonBody(`
+    <div class="flex-1 flex flex-col justify-center">
+      ${lessonHeader('Verdadero o falso','⚖️')}
+      <p class="text-sm text-[var(--brown)] text-center mb-3">Leé con atención antes de decidir.</p>
+      <div class="bg-[var(--sand)] rounded-3xl p-5 mb-5 border-2 border-[var(--sand-dark)] text-center font-extrabold">${q.statement}</div>
+      <div class="grid grid-cols-2 gap-3">
+        <button data-idx="0" class="btn-option btn-chunky py-4 rounded-2xl bg-[var(--cactus)] text-white font-extrabold border-b-[var(--cactus-dark)]">Verdadero</button>
+        <button data-idx="1" class="btn-option btn-chunky py-4 rounded-2xl bg-[var(--clay)] text-white font-extrabold border-b-[var(--clay-dark)]">Falso</button>
+      </div>
+    </div>`);
+  document.querySelectorAll('.btn-option').forEach(btn=>btn.onclick=()=>checkAnswer(Number(btn.dataset.idx),q));
+}
+
+function renderFillQuestion(q){
+  setLessonBody(`
+    <div class="flex-1 flex flex-col justify-center">
+      ${lessonHeader('Completá la respuesta','✍️')}
+      <h3 class="text-xl font-extrabold text-[var(--brown-dark)] font-display mb-4 text-center">${q.q}</h3>
+      <input id="fill-answer" class="fill-input mb-3" maxlength="60" placeholder="Escribí tu respuesta..." autocomplete="off">
+      <button id="fill-submit" class="btn-chunky py-3.5 rounded-2xl bg-[var(--cactus)] border-b-[var(--cactus-dark)] text-white font-extrabold">Comprobar</button>
+    </div>`);
+  const submit=()=>{
+    const input=document.getElementById('fill-answer').value.trim().toLowerCase();
+    if(!input)return;
+    const expected=String(q.answer||q.correctText).toLowerCase();
+    const correct=input===expected||input.includes(expected)||expected.includes(input)&&input.length>3;
+    resolveCustomAnswer(correct,q,correct?'¡Correcto!':'Respuesta para recordar: '+q.answer);
+  };
+  document.getElementById('fill-submit').onclick=submit;
+  document.getElementById('fill-answer').onkeydown=e=>{if(e.key==='Enter')submit();};
+}
+
+function renderOrderQuestion(q){
+  const items=shuffleArray(q.items);
+  setLessonBody(`
+    <div class="flex-1 flex flex-col justify-center">
+      ${lessonHeader('Ordená la secuencia','🔢')}
+      <h3 class="text-lg font-extrabold text-[var(--brown-dark)] font-display mb-4 text-center">${q.q}</h3>
+      <div id="order-list" class="flex flex-col gap-2 mb-4">
+        ${items.map((item,i)=>`<button draggable="true" data-item="${item}" class="lesson-sort-item btn-chunky bg-white border-2 border-[var(--sand-dark)] rounded-2xl px-4 py-3 text-left font-bold"><span class="mr-2">${i+1}.</span>${item}</button>`).join('')}
+      </div>
+      <button id="order-check" class="btn-chunky py-3.5 rounded-2xl bg-[var(--cactus)] border-b-[var(--cactus-dark)] text-white font-extrabold">Comprobar orden</button>
+    </div>`);
+  const list=document.getElementById('order-list');
+  let dragging=null;
+  list.querySelectorAll('.lesson-sort-item').forEach(el=>{
+    el.ondragstart=()=>{dragging=el;el.classList.add('dragging');};
+    el.ondragend=()=>{dragging=null;el.classList.remove('dragging');};
+    el.ondragover=e=>e.preventDefault();
+    el.ondrop=e=>{e.preventDefault();if(!dragging||dragging===el)return;const all=[...list.children];const a=all.indexOf(dragging),b=all.indexOf(el);if(a<b)list.insertBefore(dragging,el.nextSibling);else list.insertBefore(dragging,el);updateOrderNumbers();};
+  });
+  function updateOrderNumbers(){[...list.children].forEach((el,i)=>{const n=el.querySelector('span');if(n)n.textContent=(i+1)+'.';});}
+  document.getElementById('order-check').onclick=()=>{
+    const answer=[...list.children].map(el=>el.dataset.item);
+    const correct=answer.every((v,i)=>v===q.items[i]);
+    resolveCustomAnswer(correct,q,correct?'¡Orden perfecto!':'La secuencia puede mejorar. Mirá la explicación.');
+  };
+}
+
+function renderMatchQuestion(q){
+  const left=q.pairs.map(p=>p[0]);
+  const right=shuffleArray(q.pairs.map(p=>p[1]));
+  setLessonBody(`
+    <div class="flex-1 flex flex-col justify-center">
+      ${lessonHeader('Relacioná conceptos','🔗')}
+      <h3 class="text-lg font-extrabold text-[var(--brown-dark)] font-display mb-4 text-center">${q.q}</h3>
+      <div class="grid grid-cols-1 gap-3 mb-4">${left.map((l,i)=>`<label class="bg-white border-2 border-[var(--sand-dark)] rounded-2xl p-3"><span class="block font-extrabold mb-1">${l}</span><select data-left="${l}" class="match-select w-full bg-[var(--sand)] rounded-xl px-3 py-2 font-bold"><option value="">Elegí...</option>${right.map(r=>`<option>${r}</option>`).join('')}</select></label>`).join('')}</div>
+      <button id="match-check" class="btn-chunky py-3.5 rounded-2xl bg-[var(--cactus)] border-b-[var(--cactus-dark)] text-white font-extrabold">Comprobar relaciones</button>
+    </div>`);
+  document.getElementById('match-check').onclick=()=>{
+    let correct=true;
+    document.querySelectorAll('.match-select').forEach(sel=>{const pair=q.pairs.find(p=>p[0]===sel.dataset.left);if(!pair||sel.value!==pair[1])correct=false;});
+    resolveCustomAnswer(correct,q,correct?'¡Todas las relaciones están bien!':'Algunas relaciones no coinciden.');
+  };
+}
+
+function renderMultiQuestion(q){
+  setLessonBody(`
+    <div class="flex-1 flex flex-col justify-center">
+      ${lessonHeader('Selección múltiple','☑️')}
+      <h3 class="text-lg font-extrabold text-[var(--brown-dark)] font-display mb-2 text-center">${q.prompt}</h3>
+      <p class="text-xs text-[var(--brown)] text-center mb-4">Podés marcar más de una.</p>
+      <div class="grid grid-cols-1 gap-2 mb-4">${q.options.map((o,i)=>`<label class="multi-check bg-white border-2 border-[var(--sand-dark)] rounded-2xl px-4 py-3 font-bold"><input type="checkbox" value="${i}"><span>${o}</span></label>`).join('')}</div>
+      <button id="multi-check-btn" class="btn-chunky py-3.5 rounded-2xl bg-[var(--cactus)] border-b-[var(--cactus-dark)] text-white font-extrabold">Comprobar</button>
+    </div>`);
+  document.getElementById('multi-check-btn').onclick=()=>{
+    const chosen=[...document.querySelectorAll('.multi-check input:checked')].map(x=>Number(x.value)).sort();
+    const expected=[...(q.correctMany||[])].sort();
+    const correct=JSON.stringify(chosen)===JSON.stringify(expected);
+    resolveCustomAnswer(correct,q,correct?'¡Selección correcta!':'La selección no coincide.');
+  };
+}
+
+function renderMemoryQuestion(q){
+  if(!currentLessonState.memoryState){
+    const cards=q.cards.map((value,index)=>({id:index,pair:value,value,flipped:false,matched:false}));
+    // Convertimos ocho conceptos en cuatro parejas coherentes.
+    const pairs=[['Acequia','Agua'],['Totora','Cestería'],['Guanaco','Fauna'],['Algarrobo','Fruto']];
+    const deck=shuffleArray(pairs.flatMap((pair,pairIndex)=>pair.map(value=>({id:pairIndex+'_'+value,pairIndex,value,flipped:false,matched:false}))));
+    currentLessonState.memoryState={deck,first:null,second:null,locked:false,matches:0};
+  }
+  const ms=currentLessonState.memoryState;
+  setLessonBody(`
+    <div class="flex-1 flex flex-col justify-center">
+      ${lessonHeader('Memoria Huarpe','🧩')}
+      <h3 class="text-lg font-extrabold text-[var(--brown-dark)] font-display mb-4 text-center">${q.q}</h3>
+      <div class="lesson-memory-grid">${ms.deck.map((c,i)=>`<div class="memory-card"><button data-memory="${i}" class="memory-btn btn-chunky rounded-2xl bg-[var(--andes)] text-white border-b-[var(--andes-dark)] text-xl font-extrabold">${c.matched?'✓':c.flipped?c.value:'?'}</button></div>`).join('')}</div>
+      <p class="text-xs text-[var(--brown)] text-center mt-4">Parejas encontradas: ${ms.matches}/4</p>
+    </div>`);
+  document.querySelectorAll('.memory-btn').forEach(btn=>btn.onclick=()=>flipMemory(Number(btn.dataset.memory),q));
+}
+
+function flipMemory(index,q){
+  const ms=currentLessonState.memoryState;
+  if(ms.locked)return;
+  const card=ms.deck[index];
+  if(!card||card.flipped||card.matched)return;
+  card.flipped=true;
+  if(!ms.first){ms.first=index;renderCurrentQuestion();return;}
+  ms.second=index;
+  ms.locked=true;
+  renderCurrentQuestion();
+  const first=ms.deck[ms.first],second=ms.deck[ms.second];
+  window.setTimeout(()=>{
+    if(first.pairIndex===second.pairIndex){first.matched=second.matched=true;ms.matches++;sfxCorrect();}
+    else{first.flipped=second.flipped=false;sfxWrong();}
+    ms.first=null;ms.second=null;ms.locked=false;
+    if(ms.matches>=4)resolveCustomAnswer(true,q,'¡Encontraste todas las parejas!');
+    else renderCurrentQuestion();
+  },420);
+}
+
+function renderQuickQuestion(q){
+  setLessonBody(`
+    <div class="flex-1 flex flex-col justify-center">
+      ${lessonHeader('Desafío rápido','⚡')}
+      <div id="quick-timer" class="text-center text-3xl font-extrabold text-[var(--clay-dark)] font-display mb-3">9</div>
+      <h3 class="text-xl font-extrabold text-[var(--brown-dark)] font-display mb-6 text-center">${q.q}</h3>
+      <div class="grid grid-cols-1 gap-3">${q.options.map((o,i)=>`<button data-idx="${i}" class="btn-option btn-chunky py-3.5 px-4 rounded-2xl bg-white border-2 border-[var(--sand-dark)] text-left font-bold">${o}</button>`).join('')}</div>
+    </div>`);
+  let left=9;
+  const timer=window.setInterval(()=>{left--;const el=document.getElementById('quick-timer');if(el)el.textContent=String(Math.max(0,left));if(left<=0){clearInterval(timer);if(currentLessonState&&!currentLessonState.answered){currentLessonState.answered=true;resolveCustomAnswer(false,q,'Se terminó el tiempo.');}}},1000);
+  document.querySelectorAll('.btn-option').forEach(btn=>btn.onclick=()=>{clearInterval(timer);if(currentLessonState.answered)return;currentLessonState.answered=true;checkAnswer(Number(btn.dataset.idx),q);});
+}
+
+function resolveCustomAnswer(correct,q,message){
+  if(currentLessonState.answered)return;
+  currentLessonState.answered=true;
+  const ls=currentLessonState;
+  if(correct){ls.streak++;sfxCorrect();showFeedback(true,q,message||q.explain);}
+  else{ls.streak=0;ls.vidas--;state.vidas=Math.max(0,ls.vidas);updateTopBar();sfxWrong();showFeedback(false,q,message||q.explain);}
+}
+
+function showFeedback(correct,q,customMessage){
+  const panel=document.getElementById('lesson-feedback-panel');
+  const iconSpan=document.getElementById('feedback-icon');
+  const titleP=document.getElementById('feedback-title');
+  const explainP=document.getElementById('feedback-explain');
+  const continueBtn=document.getElementById('btn-lesson-continue');
+  document.querySelectorAll('.btn-option,.lesson-sort-item,.memory-btn,.multi-check').forEach(b=>{if('disabled'in b)b.disabled=true;});
+  if(correct){
+    panel.className='px-5 py-4 border-t-2 bg-[#EAF5E8] border-[var(--cactus)] text-[var(--cactus-dark)]';
+    iconSpan.textContent='🎉';titleP.textContent='¡Correcto!';explainP.textContent=customMessage||q.explain;
+    continueBtn.className='btn-chunky w-full py-3.5 rounded-2xl text-white font-extrabold font-display bg-[var(--cactus)] border-b-[var(--cactus-dark)]';
+    continueBtn.textContent='Siguiente';
+  }else{
+    panel.className='px-5 py-4 border-t-2 bg-[#FDE8E8] border-[var(--clay)] text-[var(--clay-dark)]';
+    iconSpan.textContent='💡';titleP.textContent='Casi';explainP.textContent=customMessage||q.explain;
+    continueBtn.className='btn-chunky w-full py-3.5 rounded-2xl text-white font-extrabold font-display bg-[var(--clay)] border-b-[var(--clay-dark)]';
+    continueBtn.textContent=currentLessonState.vidas<=0?'Ver resultado':'Entendido';
+  }
+  panel.classList.remove('hidden');
+  continueBtn.onclick=()=>{
+    const ls=currentLessonState;
+    if(ls.vidas<=0){finishLesson(false);return;}
+    ls.currentIndex++;ls.answered=false;ls.memoryState=null;
+    if(ls.currentIndex>=ls.questions.length)finishLesson(true);else renderCurrentQuestion();
+  };
+}
+
+function checkAnswer(chosen,q){
+  if(currentLessonState.answered)return;
+  currentLessonState.answered=true;
+  const correct=chosen===q.correct;
+  const ls=currentLessonState;
+  if(correct){ls.streak++;sfxCorrect();showFeedback(true,q,q.explain);}
+  else{ls.streak=0;ls.vidas--;state.vidas=Math.max(0,ls.vidas);updateTopBar();sfxWrong();showFeedback(false,q,'Respuesta correcta: '+q.options[q.correct]+'. '+q.explain);}
+}
+
+function finishLesson(success){
+  if(success){
+    state.xp+=30;state.lanzas+=5;state.gemas+=1;
+    if(typeof currentLessonState.id==='number')state.progress[currentLessonState.id]={completed:true};
+    else{const node=state.infiniteNodes.find(n=>n.id===currentLessonState.id);if(node)node.completed=true;}
+    saveState();sfxCorrect();
+    document.getElementById('result-icon').textContent='🌟';
+    document.getElementById('result-title').textContent='¡Lección Completada!';
+    document.getElementById('result-subtitle').textContent='¡Aprendiste y además sobreviviste a otro experimento educativo de la humanidad!';
+    document.getElementById('result-rewards').innerHTML='<div class="bg-white/80 rounded-2xl px-4 py-2 font-extrabold">🗡️ +5</div><div class="bg-white/80 rounded-2xl px-4 py-2 font-extrabold">💎 +1</div><div class="bg-white/80 rounded-2xl px-4 py-2 font-extrabold">✨ +30 XP</div>';
+  }else{
+    sfxWrong();
+    document.getElementById('result-icon').textContent='💔';
+    document.getElementById('result-title').textContent='¡Te quedaste sin vidas!';
+    document.getElementById('result-subtitle').textContent='Podés volver a intentarlo y mejorar la racha.';
+    document.getElementById('result-rewards').innerHTML='';
+  }
+  showScreen('screen-result');
+  document.getElementById('btn-result-continue').onclick=()=>enterMainApp();
+}
+
+document.getElementById('btn-exit-lesson').onclick=()=>enterMainApp();
+
+// --- 10) LIGA & PERFIL ---
+function renderLeague(){
+  const list = LEAGUE_RIVALS.map((r)=>({ name: r.name, avatar: r.avatar, points: 50 + Math.floor(r.name.length * 35), isUser:false }));
+  list.push({ name: state.name || 'Vos', avatar: state.avatar, points: state.xp, isUser:true });
+  list.sort((a,b)=> b.points - a.points);
+
+  document.getElementById('liga-list').innerHTML = list.map((p, idx)=>`
+    <div class="flex items-center gap-3 rounded-2xl px-4 py-3 ${p.isUser ? 'bg-[var(--cactus)]/15 border-2 border-[var(--cactus)]' : 'bg-white border border-[var(--sand-dark)]'}">
+      <span class="w-6 text-center font-extrabold font-display">${idx===0?'🥇':idx===1?'🥈':idx===2?'🥉':`#${idx+1}`}</span>
+      <span class="text-2xl">${p.avatar}</span>
+      <span class="flex-1 font-extrabold ${p.isUser ? 'text-[var(--cactus-dark)]' : 'text-[var(--brown-dark)]'}">${p.name}</span>
+      <span class="font-extrabold text-[var(--gold-dark)]">${p.points} xp</span>
+    </div>`).join('');
+}
+
+function renderProfile(){
+  document.getElementById('perfil-avatar-circle').textContent = state.avatar;
+  document.getElementById('perfil-nombre').textContent = state.name || 'Viajero';
+  document.getElementById('perfil-dificultad').textContent = 'Dificultad: ' + state.difficulty;
+  document.getElementById('perfil-lanzas').textContent = state.lanzas;
+  document.getElementById('perfil-gemas').textContent = state.gemas;
+  document.getElementById('perfil-xp').textContent = state.xp;
+  document.getElementById('perfil-record').textContent = state.guanacoRecord + 'm';
+}
+
+document.getElementById('btn-reset-progress').onclick = ()=>{
+  if(confirm('¿Reiniciar todo tu progreso?')){
+    state = defaultState();
+    saveState();
+    enterMainApp();
+  }
+};
+
+// --- 11) MINIJUEGO: CARRERA DEL GUANACO ---
+let gameCanvas=null;
+let gameCtx=null;
+let gameAnimId=0;
+let gameResizeObserver=null;
+let gameLastTime=0;
+let gameHudLast=-1;
+let gameSpawnTimer=0;
+let gameJumpQueued=false;
+
+const game={
+  active:false,
+  dist:0,
+  y:0,
+  vy:0,
+  obstacles:[],
+  speed:250,
+  ground:0,
+  dpr:1,
+  width:0,
+  height:0,
+  lastObstacleX:0
+};
+
+function resizeGameCanvas(){
+  if(!gameCanvas||!gameCtx)return;
+  const area=document.getElementById('game-area');
+  const rect=area.getBoundingClientRect();
+  const dpr=Math.min(window.devicePixelRatio||1,2);
+  game.dpr=dpr;
+  game.width=Math.max(280,rect.width);
+  game.height=Math.max(320,rect.height);
+  gameCanvas.width=Math.floor(game.width*dpr);
+  gameCanvas.height=Math.floor(game.height*dpr);
+  gameCanvas.style.width=game.width+'px';
+  gameCanvas.style.height=game.height+'px';
+  gameCtx.setTransform(dpr,0,0,dpr,0,0);
+  game.ground=game.height-48;
+  if(!game.active)game.y=game.ground-48;
+}
+
+function openMinigame(){
+  stopGameLoop();
+  showScreen('screen-game');
+  gameCanvas=document.getElementById('game-canvas');
+  gameCtx=gameCanvas.getContext('2d',{alpha:false,desynchronized:true});
+  resizeGameCanvas();
+  if(gameResizeObserver)gameResizeObserver.disconnect();
+  if('ResizeObserver' in window){
+    gameResizeObserver=new ResizeObserver(()=>{if(!game.active)resizeGameCanvas();});
+    gameResizeObserver.observe(document.getElementById('game-area'));
+  }
+  resetGame();
+}
+
+function resetGame(){
+  stopGameLoop();
+  resizeGameCanvas();
+  game.active=false;
+  game.dist=0;
+  game.y=game.ground-48;
+  game.vy=0;
+  game.obstacles=[];
+  game.speed=250;
+  game.spawnTimer=.9;
+  game.lastObstacleX=game.width;
+  gameHudLast=-1;
+  gameJumpQueued=false;
+  document.getElementById('game-distance').textContent='0';
+  document.getElementById('game-start-overlay').classList.remove('hidden');
+  document.getElementById('game-over-overlay').classList.add('hidden');
+  document.getElementById('btn-game-retry').classList.remove('hidden');
+  document.getElementById('btn-game-continue').classList.add('hidden');
+  document.getElementById('game-result-icon').textContent='🌵💥';
+  document.getElementById('game-result-title').textContent='¡Choque con un cactus!';
+  drawGame();
+}
+
+function stopGameLoop(){
+  game.active=false;
+  if(gameAnimId){cancelAnimationFrame(gameAnimId);gameAnimId=0;}
+}
+
+function startGame(){
+  if(game.active)return;
+  game.active=true;
+  gameLastTime=performance.now();
+  document.getElementById('game-start-overlay').classList.add('hidden');
+  gameAnimId=requestAnimationFrame(gameLoop);
+}
+
+function jumpGuanaco(event){
+  if(event&&event.target&&event.target.closest('button'))return;
+  if(!game.active){startGame();return;}
+  if(game.y>=game.ground-49){
+    game.vy=-620;
+    sfxJump();
+  }
+}
+
+function gameLoop(now){
+  if(!game.active)return;
+  const rawDt=(now-gameLastTime)/1000;
+  gameLastTime=now;
+  const dt=Math.min(rawDt,.032);
+  updateGame(dt);
+  drawGame();
+  if(game.active)gameAnimId=requestAnimationFrame(gameLoop);
+}
+
+const GUANACO_FINISH_DISTANCE = 100;
+
+function updateGame(dt){
+  if(gameJumpQueued){gameJumpQueued=false;jumpGuanaco();}
+  const gravity=1750;
+  game.vy+=gravity*dt;
+  game.y+=game.vy*dt;
+  if(game.y>game.ground-48){game.y=game.ground-48;game.vy=0;}
+
+  game.speed=Math.min(440,250+game.dist*1.9);
+  game.dist+=game.speed*dt/100;
+  const shown=Math.floor(game.dist);
+  if(shown!==gameHudLast){
+    gameHudLast=shown;
+    document.getElementById('game-distance').textContent=String(Math.min(shown,GUANACO_FINISH_DISTANCE));
+  }
+  if(game.dist>=GUANACO_FINISH_DISTANCE){
+    finishGuanacoRace();
+    return;
+  }
+
+  game.spawnTimer-=dt;
+  if(game.spawnTimer<=0){
+    const minGap=150+Math.random()*120;
+    if(game.obstacles.length===0||game.obstacles[game.obstacles.length-1].x<game.width-minGap){
+      const h=28+Math.random()*30;
+      game.obstacles.push({x:game.width+24,w:24,h});
+      game.spawnTimer=.72+Math.random()*.72;
+    }else{
+      game.spawnTimer=.18;
+    }
+  }
+
+  const player={x:38,y:game.y+5,w:48,h:43};
+  for(let i=game.obstacles.length-1;i>=0;i--){
+    const obs=game.obstacles[i];
+    obs.x-=game.speed*dt;
+    const hit=player.x<obs.x+obs.w-3&&player.x+player.w>obs.x+3&&player.y<game.ground-obs.h&&player.y+player.h>game.ground-obs.h+4;
+    if(hit){gameOver();return;}
+    if(obs.x+obs.w<-30)game.obstacles.splice(i,1);
+  }
+}
+
+function drawGame(){
+  if(!gameCtx)return;
+  const w=game.width,h=game.height,g=game.ground;
+  const dark=!!state.darkMode;
+  const colors=dark?{bg:'#1B1815',sun:'rgba(230,181,87,.16)',m1:'rgba(76,138,150,.18)',m2:'rgba(111,154,95,.18)',ground:'#302820',line:'rgba(199,161,124,.35)',guanaco:'#B78B63',head:'#D0A878',light:'#F0D7B8',eye:'#140D08',leg:'#8C6546',cactus:'#6F9A5F'}:{bg:'#FBF3DD',sun:'rgba(227,167,60,.18)',m1:'rgba(47,110,122,.13)',m2:'rgba(76,122,63,.13)',ground:'#C89B6F',line:'rgba(107,66,38,.25)',guanaco:'#A9784D',head:'#C99A6B',light:'#F2D7B6',eye:'#24160D',leg:'#6B4226',cactus:'#4C7A3F'};
+  gameCtx.fillStyle=colors.bg; gameCtx.fillRect(0,0,w,h);
+  gameCtx.fillStyle=colors.sun; gameCtx.beginPath();gameCtx.arc(w-55,55,48,0,Math.PI*2);gameCtx.fill();
+  gameCtx.fillStyle=colors.m1; gameCtx.beginPath();gameCtx.moveTo(0,g);gameCtx.lineTo(w*.25,g-90);gameCtx.lineTo(w*.45,g);gameCtx.closePath();gameCtx.fill();
+  gameCtx.fillStyle=colors.m2; gameCtx.beginPath();gameCtx.moveTo(w*.25,g);gameCtx.lineTo(w*.58,g-65);gameCtx.lineTo(w*.8,g);gameCtx.closePath();gameCtx.fill();
+  gameCtx.fillStyle=colors.ground;gameCtx.fillRect(0,g,w,h-g); gameCtx.fillStyle=colors.line;gameCtx.fillRect(0,g,w,3);
+  drawGuanacoForward(62,game.y+40,1,colors); game.obstacles.forEach(o=>drawCactus(o,colors));
+}
+
+function drawGuanacoForward(x,y,scale,colors={}){
+  const ctx=gameCtx;
+  ctx.save();
+  ctx.translate(x,y);
+  ctx.scale(scale,scale);
+  // Cuerpo mirando hacia la derecha. Nada de guanacos haciendo turismo mirando al pasado.
+  ctx.fillStyle=colors.guanaco||'#A9784D';
+  ctx.beginPath();ctx.ellipse(22,0,25,15,0,0,Math.PI*2);ctx.fill();
+  ctx.fillStyle=colors.head||'#C99A6B';
+  ctx.beginPath();ctx.ellipse(45,-13,12,10,-.2,0,Math.PI*2);ctx.fill();
+  ctx.fillStyle='#A9784D';
+  ctx.fillRect(46,-20,5,18);
+  ctx.fillRect(56,-20,5,18);
+  ctx.beginPath();ctx.ellipse(49,-25,6,8,.15,0,Math.PI*2);ctx.fill();
+  ctx.beginPath();ctx.ellipse(59,-25,6,8,-.15,0,Math.PI*2);ctx.fill();
+  ctx.fillStyle=colors.light||'#F2D7B6';
+  ctx.beginPath();ctx.ellipse(48,-14,7,6,-.15,0,Math.PI*2);ctx.fill();
+  ctx.fillStyle=colors.eye||'#24160D';
+  ctx.beginPath();ctx.arc(52,-16,1.8,0,Math.PI*2);ctx.fill();
+  ctx.fillStyle='#3B2415';
+  ctx.beginPath();ctx.ellipse(57,-10,3.2,2.2,0,0,Math.PI*2);ctx.fill();
+  ctx.strokeStyle=colors.leg||'#6B4226';ctx.lineWidth=3;ctx.lineCap='round';
+  ctx.beginPath();ctx.moveTo(8,10);ctx.lineTo(4,27);ctx.moveTo(28,10);ctx.lineTo(25,27);ctx.stroke();
+  ctx.restore();
+}
+
+function drawCactus(obs,colors={}){
+  const ctx=gameCtx;
+  const x=obs.x,y=game.ground-obs.h;
+  ctx.save();ctx.fillStyle=colors.cactus||'#4C7A3F';
+  ctx.fillRect(x,y,obs.w,obs.h);
+  ctx.fillRect(x-7,y+obs.h*.42,7,6);
+  ctx.fillRect(x+obs.w,y+obs.h*.28,7,6);
+  ctx.restore();
+}
+
+function finishGuanacoRace(){
+  if(!game.active)return;
+  stopGameLoop();
+  sfxCorrect();
+  haptic([20,40,20]);
+  const finalDist=GUANACO_FINISH_DISTANCE;
+  const newRecord=finalDist>state.guanacoRecord;
+  if(newRecord){state.guanacoRecord=finalDist;state.lanzas+=10;saveState();}
+
+  // Al llegar a 100 m se gana. No se muestra la pantalla de choque.
+  document.getElementById('game-result-icon').textContent='🏁🦙';
+  document.getElementById('game-result-title').textContent='¡Carrera completada!';
+  document.getElementById('game-over-score').textContent=`Llegaste a ${finalDist} metros${newRecord?' · ¡Nuevo récord! +10 🗡️':''}.`;
+  document.getElementById('btn-game-retry').classList.add('hidden');
+  document.getElementById('btn-game-continue').classList.remove('hidden');
+  document.getElementById('game-over-overlay').classList.remove('hidden');
+}
+
+function gameOver(){
+  if(!game.active)return;
+  stopGameLoop();
+  sfxWrong();
+  const finalDist=Math.floor(game.dist);
+  const newRecord=finalDist>state.guanacoRecord;
+  if(newRecord){state.guanacoRecord=finalDist;state.lanzas+=10;saveState();}
+  document.getElementById('game-result-icon').textContent='🌵💥';
+  document.getElementById('game-result-title').textContent='¡Choque con un cactus!';
+  document.getElementById('game-over-score').textContent=`¡Te chocaste! Recorriste ${finalDist} m. La meta es ${GUANACO_FINISH_DISTANCE} m.`;
+  document.getElementById('btn-game-retry').classList.remove('hidden');
+  document.getElementById('btn-game-continue').classList.add('hidden');
+  document.getElementById('game-over-overlay').classList.remove('hidden');
+}
+
+function continueAfterGuanaco(){
+  if(window.activeAiGame){
+    window.activeAiGame.completed=true;
+    saveState();
+    const node=window.activeAiGame;
+    window.activeAiGame=null;
+    document.getElementById('game-over-overlay').classList.add('hidden');
+    renderPath();
+    enterMainApp();
+    setTimeout(()=>{ if(node) petSay('¡Desafío IA completado! Ya podés seguir con la próxima aventura.'); },250);
+    return;
+  }
+  // El nodo 4 es la carrera y el nodo 5 es la siguiente lección.
+  state.progress[4]={completed:true};
+  saveState();
+  const nextLesson=LESSON_NODES.find(node=>node.id===5);
+  document.getElementById('game-over-overlay').classList.add('hidden');
+  if(nextLesson){
+    openLesson(nextLesson.id);
+  }else{
+    enterMainApp();
+  }
+}
+
+const gameArea=document.getElementById('game-area');
+gameArea.addEventListener('pointerdown',jumpGuanaco,{passive:true});
+document.getElementById('btn-game-retry').onclick=resetGame;
+document.getElementById('btn-game-continue').onclick=continueAfterGuanaco;
+document.getElementById('btn-game-finish').onclick=enterMainApp;
+document.getElementById('btn-exit-game').onclick=()=>{stopGameLoop();enterMainApp();};
+window.addEventListener('resize',()=>{if(document.getElementById('screen-game').classList.contains('active'))resizeGameCanvas();},{passive:true});
+
+// --- 11B) MASCOTA COMPAÑERA PERMANENTE ---
+const PETS=['🦙','🦅','🦊','🐾','🌵'];
+const PET_MESSAGES=['¡Vamos! Hay una nueva aventura por acá.','Pista: prestá atención a las palabras clave.','Cada error también sirve para aprender.','La próxima lección puede ser completamente distinta.','Cuyo tiene más historias de las que entran en una sola pantalla.'];
+function petSay(message){const bubble=document.getElementById('companion-pet-bubble');const pet=document.getElementById('companion-pet');if(!bubble||!pet)return; bubble.textContent=message; bubble.classList.add('show'); pet.classList.add('speaking'); clearTimeout(window.petBubbleTimer); window.petBubbleTimer=setTimeout(()=>{bubble.classList.remove('show');pet.classList.remove('speaking');},3000);}
+function initCompanionPet(){const pet=document.getElementById('companion-pet');if(!pet)return; const saved=localStorage.getItem('huarprendizaje_pet'); pet.textContent=saved||PETS[0]; const action=()=>{const msg=PET_MESSAGES[Math.floor(Math.random()*PET_MESSAGES.length)];petSay(msg);sfxClick();}; pet.onclick=action;pet.onkeydown=e=>{if(e.key==='Enter'||e.key===' ')action();};}
+
+// --- 12) AJUSTES & EVENTOS INICIALES ---
+function applySettings(){
+  const root=document.getElementById('app-root');
+  if(!root)return;
+  root.classList.toggle('dark-mode',!!state.darkMode);
+  const sound=document.getElementById('toggle-sound');
+  const haptics=document.getElementById('toggle-haptics');
+  const dark=document.getElementById('toggle-dark');
+  [sound,haptics,dark].forEach(el=>{
+    if(!el)return;
+    el.classList.remove('on');
+    el.setAttribute('aria-checked','false');
+  });
+  if(sound){sound.classList.toggle('on',!!state.soundOn);sound.setAttribute('aria-checked',String(!!state.soundOn));}
+  if(haptics){haptics.classList.toggle('on',!!state.hapticsOn);haptics.setAttribute('aria-checked',String(!!state.hapticsOn));}
+  if(dark){dark.classList.toggle('on',!!state.darkMode);dark.setAttribute('aria-checked',String(!!state.darkMode));}
+}
+
+function toggleSetting(key){
+  state[key]=!state[key];
+  saveState();
+  applySettings();
+  if(key==='soundOn' && state.soundOn) sfxClick();
+}
+
+document.getElementById('btn-open-settings').onclick = ()=>{
+  applySettings();
+  document.getElementById('settings-overlay').classList.remove('hidden');
+  document.getElementById('settings-overlay').classList.add('flex');
+};
+document.getElementById('btn-close-settings').onclick = ()=>{
+  document.getElementById('settings-overlay').classList.add('hidden');
+  document.getElementById('settings-overlay').classList.remove('flex');
+};
+document.getElementById('toggle-sound').onclick=()=>toggleSetting('soundOn');
+document.getElementById('toggle-haptics').onclick=()=>toggleSetting('hapticsOn');
+document.getElementById('toggle-dark').onclick=()=>toggleSetting('darkMode');
+document.getElementById('btn-pet-change').onclick=()=>{const current=document.getElementById('companion-pet').textContent;const next=PETS[(PETS.indexOf(current)+1)%PETS.length];localStorage.setItem('huarprendizaje_pet',next);document.getElementById('companion-pet').textContent=next;petSay('¡Nueva mascota lista para la aventura!');};
+document.getElementById('btn-ai-new').onclick=()=>{document.getElementById('settings-overlay').classList.add('hidden');document.getElementById('settings-overlay').classList.remove('flex');generateAILesson();};
+
+document.querySelectorAll('.tab-btn').forEach(btn=>{
+  btn.onclick = ()=>{ sfxClick(); showTab(btn.dataset.tab); };
+});
+
+window.onload = ()=>{
+  applyStaticIcons();
+  initCompanionPet();
+  applySettings();
+  if(state.onboarded){ enterMainApp(); }
+  else { initWelcomeScreen(); }
+};
+/* ========================================================================
+   13) SISTEMA DE CALIDAD Y DIAGNÓSTICO
+   ------------------------------------------------------------------------
+   Este bloque existe para que el proyecto sea más mantenible. Cada helper
+   tiene una función pequeña y no depende de frameworks adicionales.
+   ======================================================================== */
+
+const HUARPRIZ = {
+  version:'4.0.0',
+  build:'huarpe-learning-enhanced',
+  features:[
+    'fondos huarpes animados',
+    'subtitulos speech boundary',
+    'banco de respuestas aleatorizado',
+    'lecciones de todos los formatos + formatos nuevos',
+    'titulos y preguntas generados dinámicamente',
+    'videollamara con entrada por voz',
+    'mascota compañera persistente',
+    'minijuego con delta time',
+    'guanaco dibujado hacia adelante',
+    'persistencia local'
+  ]
+};
+
+function safeText(value,fallback=''){
+  if(value===null||value===undefined)return fallback;
+  return String(value);
+}
+
+function clamp(value,min,max){
+  return Math.max(min,Math.min(max,value));
+}
+
+function isFiniteNumber(value){
+  return typeof value==='number'&&Number.isFinite(value);
+}
+
+function normalizeStateNumbers(){
+  const numeric=['xp','lanzas','gemas','vidas','guanacoRecord'];
+  numeric.forEach(key=>{
+    if(!isFiniteNumber(state[key]))state[key]=Number(state[key])||0;
+    state[key]=Math.max(0,state[key]);
+  });
+}
+
+function ensureStateShape(){
+  if(!state||typeof state!=='object')state=defaultState();
+  if(!state.progress||typeof state.progress!=='object')state.progress={};
+  if(!Array.isArray(state.infiniteNodes))state.infiniteNodes=[];
+  if(!Array.isArray(AVATARS)||AVATARS.length===0)state.avatar='🦅';
+  if(!DIFFICULTIES.some(d=>d.id===state.difficulty))state.difficulty='basico';
+  normalizeStateNumbers();
+}
+
+function safeSave(){
+  try{ensureStateShape();saveState();return true;}catch(error){console.warn('No se pudo guardar el progreso',error);return false;}
+}
+
+function announce(message){
+  const live=document.getElementById('vc-live-status');
+  if(live)live.textContent=safeText(message,'Listo');
+}
+
+function updateProgressBarSafely(percent){
+  const bar=document.getElementById('lesson-progress-bar');
+  if(bar)bar.style.width=clamp(Number(percent)||0,0,100)+'%';
+}
+
+function getCurrentQuestion(){
+  if(!currentLessonState)return null;
+  return currentLessonState.questions[currentLessonState.currentIndex]||null;
+}
+
+function getQuestionType(q){
+  if(!q)return 'unknown';
+  if(q.type)return q.type;
+  if(Array.isArray(q.options))return 'choice';
+  return 'custom';
+}
+
+function lessonTypeLabel(type){
+  const labels={
+    normal:'Pregunta',cuento:'Cuento',mision:'Misión',truefalse:'Verdadero/Falso',
+    fill:'Completar',order:'Ordenar',match:'Relacionar',multi:'Selección múltiple',
+    memory:'Memoria',quick:'Desafío rápido',scenario:'Escenario',vocab:'Vocabulario'
+  };
+  return labels[type]||'Desafío';
+}
+
+function lessonTypeIcon(type){
+  const icons={
+    normal:'🧠',cuento:'📜',mision:'🛡️',truefalse:'⚖️',fill:'✍️',order:'🔢',
+    match:'🔗',multi:'☑️',memory:'🧩',quick:'⚡',scenario:'🎭',vocab:'📚'
+  };
+  return icons[type]||'✨';
+}
+
+function buildLessonMeta(q){
+  const type=getQuestionType(q);
+  return {type,label:lessonTypeLabel(type),icon:lessonTypeIcon(type)};
+}
+
+function markButtonState(button,kind){
+  if(!button)return;
+  button.dataset.state=kind;
+  if(kind==='correct')button.classList.add('ring-4','ring-green-300');
+  if(kind==='wrong')button.classList.add('ring-4','ring-red-300');
+}
+
+function disableLessonControls(){
+  document.querySelectorAll('#lesson-body button,#lesson-body input,#lesson-body select').forEach(control=>{
+    if(control.dataset.memory!=='')control.disabled=true;
+  });
+}
+
+function restoreLessonControls(){
+  document.querySelectorAll('#lesson-body button,#lesson-body input,#lesson-body select').forEach(control=>control.disabled=false);
+}
+
+function resetSpeechState(){
+  maraSpeechToken++;
+  clearMaraSpeechVisuals();
+  if('speechSynthesis'in window){
+    try{window.speechSynthesis.cancel();}catch(e){}
+  }
+}
+
+function callIsActive(){
+  const screen=document.getElementById('screen-videocall');
+  return !!screen&&screen.classList.contains('active');
+}
+
+function gameIsActive(){
+  const screen=document.getElementById('screen-game');
+  return !!screen&&screen.classList.contains('active');
+}
+
+function lessonIsActive(){
+  const screen=document.getElementById('screen-lesson');
+  return !!screen&&screen.classList.contains('active');
+}
+
+function cleanupTransientSystems(){
+  if(!callIsActive())resetSpeechState();
+  if(!gameIsActive())stopGameLoop();
+}
+
+function refreshEverything(){
+  ensureStateShape();
+  updateTopBar();
+  renderProfile();
+  renderPath();
+  renderLeague();
+}
+
+function diagnostics(){
+  const result={
+    version:HUARPRIZ.version,
+    screens:document.querySelectorAll('.screen').length,
+    fixedLessons:LESSON_NODES.length,
+    aiLessons:state.infiniteNodes.length,
+    xp:state.xp,
+    currentLevel:currentLevel(),
+    speech:'speechSynthesis'in window,
+    boundary:'SpeechSynthesisUtterance'in window&&'onboundary'in SpeechSynthesisUtterance.prototype,
+    canvas:!!document.getElementById('game-canvas'),
+    raf:'requestAnimationFrame'in window,
+    resizeObserver:'ResizeObserver'in window
+  };
+  console.table(result);
+  return result;
+}
+
+window.HuarprendizajeDiagnostics=diagnostics;
+window.HuarprendizajeVersion=HUARPRIZ.version;
+
+/* ========================================================================
+   14) BANCO DE MICRODESAFÍOS
+   ======================================================================== */
+
+const MICRO_CHALLENGES=[
+  {id:'mc1',text:'Nombrá una provincia de Cuyo.',answers:['mendoza','san juan','san luis']},
+  {id:'mc2',text:'¿Cómo se llaman los canales de riego?',answers:['acequia','acequias']},
+  {id:'mc3',text:'Nombrá un animal nativo de Cuyo.',answers:['guanaco','condor','cóndor','mara']},
+  {id:'mc4',text:'¿Qué planta se usaba en cestería y balsas?',answers:['totora']},
+  {id:'mc5',text:'¿Qué árbol está asociado a la algarroba?',answers:['algarrobo']},
+  {id:'mc6',text:'¿Qué región se asocia históricamente con los Huarpes?',answers:['cuyo']},
+  {id:'mc7',text:'¿Qué material vegetal aparece en los tejidos tradicionales?',answers:['junco','totora']},
+  {id:'mc8',text:'¿Qué recurso natural es especialmente importante en un ambiente árido?',answers:['agua']},
+  {id:'mc9',text:'¿Qué animal aparece en el minijuego?',answers:['guanaco']},
+  {id:'mc10',text:'¿Qué elemento natural se relaciona con el riego?',answers:['agua']},
+  {id:'mc11',text:'¿Qué ave es característica de la cordillera?',answers:['condor','cóndor']},
+  {id:'mc12',text:'¿Qué fruto puede obtenerse del algarrobo?',answers:['algarroba','fruto']}
+];
+
+function getRandomMicroChallenge(){
+  return MICRO_CHALLENGES[Math.floor(Math.random()*MICRO_CHALLENGES.length)];
+}
+
+function evaluateMicroChallenge(challenge,input){
+  const normalized=safeText(input).trim().toLowerCase();
+  return challenge.answers.some(answer=>normalized.includes(answer));
+}
+
+function createMicroChallengeCard(container){
+  if(!container)return;
+  const challenge=getRandomMicroChallenge();
+  container.innerHTML=`<div class="bg-white rounded-2xl p-4 border-2 border-[var(--sand-dark)]"><p class="font-extrabold">${challenge.text}</p><input class="fill-input mt-3" placeholder="Tu respuesta"><button class="btn-chunky mt-2 w-full rounded-xl py-2.5 bg-[var(--cactus)] text-white font-extrabold border-b-[var(--cactus-dark)]">Responder</button></div>`;
+  const input=container.querySelector('input');
+  const button=container.querySelector('button');
+  button.onclick=()=>{
+    const ok=evaluateMicroChallenge(challenge,input.value);
+    button.textContent=ok?'¡Correcto! 🎉':'Probá otra vez';
+    button.classList.toggle('bg-[var(--cactus)]',ok);
+    button.classList.toggle('bg-[var(--clay)]',!ok);
+  };
+}
+
+/* ========================================================================
+   15) UTILIDADES DE DATOS EDUCATIVOS
+   ======================================================================== */
+
+function countCorrectAnswers(questions){
+  return questions.reduce((total,q)=>total+(Number.isInteger(q.correct)?1:0),0);
+}
+
+function countLessonFormats(){
+  const counts={};
+  const add=(q)=>{const type=getQuestionType(q);counts[type]=(counts[type]||0)+1;};
+  LESSON_NODES.forEach(node=>{
+    Object.values(node.questions||{}).forEach(list=>list.forEach(add));
+  });
+  state.infiniteNodes.forEach(node=>(node.questions||[]).forEach(add));
+  return counts;
+}
+
+function validateQuestion(q){
+  const errors=[];
+  if(!q||typeof q!=='object')return ['Pregunta inválida'];
+  if(!q.q&&q.type!=='memory'&&q.type!=='order'&&q.type!=='match')errors.push('Falta texto de pregunta');
+  if(Array.isArray(q.options)){
+    if(q.options.length<2)errors.push('Hay menos de dos opciones');
+    if(!Number.isInteger(q.correct)&&q.type!=='multi')errors.push('Índice correcto inválido');
+    if(Number.isInteger(q.correct)&&(q.correct<0||q.correct>=q.options.length))errors.push('Índice fuera de rango');
+  }
+  if(q.type==='multi'&&!Array.isArray(q.correctMany))errors.push('correctMany faltante');
+  if(q.type==='fill'&&!q.answer&&!q.correctText)errors.push('Respuesta de completar faltante');
+  if(q.type==='order'&&(!Array.isArray(q.items)||q.items.length<2))errors.push('Orden sin elementos');
+  if(q.type==='match'&&(!Array.isArray(q.pairs)||q.pairs.length<2))errors.push('Relaciones insuficientes');
+  return errors;
+}
+
+function validateAllLessons(){
+  const report=[];
+  LESSON_NODES.forEach(node=>{
+    Object.entries(node.questions||{}).forEach(([difficulty,questions])=>{
+      questions.forEach((q,index)=>{
+        const errors=validateQuestion(q);
+        if(errors.length)report.push({node:node.id,difficulty,index,errors});
+      });
+    });
+  });
+  state.infiniteNodes.forEach(node=>{
+    (node.questions||[]).forEach((q,index)=>{
+      const errors=validateQuestion(q);
+      if(errors.length)report.push({node:node.id,index,errors});
+    });
+  });
+  return report;
+}
+
+function repairQuestionBank(){
+  randomizeFixedLessonBank();
+  state.infiniteNodes.forEach(node=>{
+    node.questions=normalizeLessonQuestions(node.questions||[]);
+  });
+  safeSave();
+  return validateAllLessons();
+}
+
+window.HuarprendizajeValidate=validateAllLessons;
+window.HuarprendizajeRepair=repairQuestionBank;
+
+/* ========================================================================
+   16) CONTROL DE MEMORIA Y LIMPIEZA
+   ======================================================================== */
+
+function pruneOldInfiniteLessons(limit=30){
+  if(!Array.isArray(state.infiniteNodes))state.infiniteNodes=[];
+  if(state.infiniteNodes.length<=limit)return;
+  const completed=state.infiniteNodes.filter(n=>n.completed);
+  const pending=state.infiniteNodes.filter(n=>!n.completed);
+  const keepCompleted=completed.slice(-Math.max(0,limit-pending.length));
+  state.infiniteNodes=[...keepCompleted,...pending].slice(-limit);
+  safeSave();
+}
+
+function cleanExpiredVisualTimers(){
+  if(maraBoundaryTimer){clearTimeout(maraBoundaryTimer);maraBoundaryTimer=null;}
+}
+
+function onVisibilityChange(){
+  if(document.hidden){
+    if('speechSynthesis'in window){try{window.speechSynthesis.pause();}catch(e){}}
+    if(game.active)gameLastTime=performance.now();
+  }else{
+    if('speechSynthesis'in window){try{window.speechSynthesis.resume();}catch(e){}}
+    if(game.active)gameLastTime=performance.now();
+  }
+}
+
+document.addEventListener('visibilitychange',onVisibilityChange);
+window.addEventListener('pagehide',()=>{stopGameLoop();resetSpeechState();});
+
+/* ========================================================================
+   17) COMPATIBILIDAD Y MIGRACIÓN DE DATOS
+   ======================================================================== */
+
+function migrateState(){
+  ensureStateShape();
+  if(state.legacyVersion===undefined)state.legacyVersion=1;
+  if(state.legacyVersion<2){
+    state.infiniteNodes=Array.isArray(state.infiniteNodes)?state.infiniteNodes:[];
+    state.legacyVersion=2;
+  }
+  if(state.legacyVersion<3){
+    state.infiniteNodes.forEach(node=>{
+      if(node.questions)node.questions=normalizeLessonQuestions(node.questions);
+    });
+    state.legacyVersion=3;
+  }
+  safeSave();
+}
+
+function resetOnlyTransientData(){
+  currentLessonState=null;
+  currentVcIndex=0;
+  stopGameLoop();
+  resetSpeechState();
+}
+
+/* ========================================================================
+   18) PRUEBAS RÁPIDAS INTERNAS
+   ======================================================================== */
+
+function selfTestShuffle(){
+  const original={options:['A','B','C','D'],correct:0};
+  let moved=false;
+  for(let i=0;i<20;i++){
+    const copy=shuffleQuestionOptions(cloneQuestion(original));
+    if(copy.correct!==0)moved=true;
+  }
+  return moved;
+}
+
+function selfTestDelta(){
+  const before=game.dist;
+  const speed=250;
+  const dt=.016;
+  return speed*dt/100===.04&&Number.isFinite(before);
+}
+
+function selfTestSpeech(){
+  return 'speechSynthesis'in window&&typeof SpeechSynthesisUtterance!=='undefined';
+}
+
+function runSelfTests(){
+  const tests={shuffle:selfTestShuffle(),delta:selfTestDelta(),speech:selfTestSpeech(),bank:validateAllLessons().length===0};
+  console.table(tests);
+  return tests;
+}
+
+window.HuarprendizajeSelfTest=runSelfTests;
+
+/* ========================================================================
+   19) DATOS DE CONTEXTO PARA NUEVAS LECCIONES
+   ======================================================================== */
+
+const HUARPE_CONTEXT={
+  region:['Cuyo','Mendoza','San Juan','San Luis'],
+  water:['agua','deshielo','acequia','riego','canal'],
+  materials:['totora','junco','cestería','canasto'],
+  flora:['algarrobo','algarroba'],
+  fauna:['guanaco','cóndor','mara'],
+  values:['cuidado','comunidad','respeto','adaptación','memoria'],
+  formats:AI_LESSON_TYPES
+};
+
+function getContextWords(topic){
+  return HUARPE_CONTEXT[topic]||HUARPE_CONTEXT.values;
+}
+
+function buildVocabularyQuestion(topic){
+  const words=getContextWords(topic);
+  const word=words[Math.floor(Math.random()*words.length)];
+  return {
+    type:'vocab',
+    q:`¿Cuál de estas palabras pertenece al tema ${topic}?`,
+    options:shuffleArray([word,...getContextWords('values').slice(0,3)]),
+    correct:0,
+    explain:`La palabra «${word}» aparece dentro del tema ${topic}.`
+  };
+}
+
+/* ========================================================================
+   20) ACCESIBILIDAD
+   ======================================================================== */
+
+function setAriaBusy(element,busy){
+  if(element)element.setAttribute('aria-busy',busy?'true':'false');
+}
+
+function focusLessonPrimaryControl(){
+  const first=document.querySelector('#lesson-body input,#lesson-body button,#lesson-body select');
+  if(first&&typeof first.focus==='function')window.setTimeout(()=>first.focus(),30);
+}
+
+function focusCallInput(){
+  const input=document.getElementById('vc-user-input');
+  if(input)window.setTimeout(()=>input.focus(),80);
+}
+
+function announceLessonType(q){
+  const meta=buildLessonMeta(q);
+  const title=document.querySelector('#screen-lesson h3');
+  if(title)title.setAttribute('aria-label',`${meta.label}. ${safeText(q.q,'')}`);
+}
+
+/* ========================================================================
+   21) SEGURIDAD DE RENDERIZADO
+   ======================================================================== */
+
+function escapeHtml(value){
+  return safeText(value)
+    .replaceAll('&','&amp;')
+    .replaceAll('<','&lt;')
+    .replaceAll('>','&gt;')
+    .replaceAll('"','&quot;')
+    .replaceAll("'",'&#039;');
+}
+
+function escapeAttribute(value){
+  return escapeHtml(value).replaceAll('`','&#096;');
+}
+
+function safeOptionText(value){
+  return escapeHtml(value);
+}
+
+/* ========================================================================
+   22) ESTADÍSTICAS DE PROGRESO
+   ======================================================================== */
+
+function getCompletedLessonCount(){
+  let total=0;
+  LESSON_NODES.forEach(node=>{if(state.progress[node.id]?.completed)total++;});
+  total+=state.infiniteNodes.filter(node=>node.completed).length;
+  return total;
+}
+
+function getTotalLessonCount(){
+  return LESSON_NODES.filter(node=>node.type==='lesson').length+state.infiniteNodes.length;
+}
+
+function getCompletionPercent(){
+  const total=getTotalLessonCount();
+  if(total===0)return 0;
+  return Math.round(getCompletedLessonCount()/total*100);
+}
+
+function getLeagueScore(){
+  return Math.round(state.xp+state.lanzas*.5+state.gemas*2);
+}
+
+function buildProfileSummary(){
+  return {
+    name:state.name||'Viajero',
+    level:currentLevel(),
+    xp:state.xp,
+    spears:state.lanzas,
+    gems:state.gemas,
+    lives:state.vidas,
+    guanacoRecord:state.guanacoRecord,
+    lessonsCompleted:getCompletedLessonCount(),
+    completion:getCompletionPercent(),
+    leagueScore:getLeagueScore()
+  };
+}
+
+window.HuarprendizajeProfile=buildProfileSummary;
+
+/* ========================================================================
+   23) OPTIMIZACIÓN DEL DOM
+   ======================================================================== */
+
+function setText(id,value){
+  const el=document.getElementById(id);
+  if(el)el.textContent=safeText(value);
+}
+
+function setHtml(id,value){
+  const el=document.getElementById(id);
+  if(el)el.innerHTML=value;
+}
+
+function toggleHidden(id,hidden){
+  const el=document.getElementById(id);
+  if(el)el.classList.toggle('hidden',hidden);
+}
+
+function addClass(id,className){
+  const el=document.getElementById(id);
+  if(el)el.classList.add(className);
+}
+
+function removeClass(id,className){
+  const el=document.getElementById(id);
+  if(el)el.classList.remove(className);
+}
+
+/* ========================================================================
+   24) EVENTOS DE TECLADO
+   ======================================================================== */
+
+document.addEventListener('keydown',event=>{
+  if(event.key==='Escape'){
+    if(document.getElementById('settings-overlay').classList.contains('flex')){
+      document.getElementById('btn-close-settings').click();
+      return;
+    }
+    if(callIsActive()){
+      document.getElementById('btn-exit-vc').click();
+      return;
+    }
+    if(lessonIsActive()){
+      document.getElementById('btn-exit-lesson').click();
+      return;
+    }
+  }
+  if(gameIsActive()&&(event.code==='Space'||event.key==='ArrowUp')){
+    event.preventDefault();
+    jumpGuanaco();
+  }
+});
+
+/* ========================================================================
+   25) MODO REDUCIDO DE MOVIMIENTO
+   ======================================================================== */
+
+const prefersReducedMotion=window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+if(prefersReducedMotion){
+  document.documentElement.classList.add('reduce-motion');
+}
+
+/* ========================================================================
+   26) INFORMACIÓN DE FUENTE DEL FONDO DE LLAMADA
+   ======================================================================== */
+
+const CALL_BACKGROUND_SOURCE={
+  url:'https://upload.wikimedia.org/wikipedia/commons/5/5e/Huarpe_member.jpg',
+  provider:'Wikimedia Commons',
+  license:'Public domain',
+  note:'Se usa como fondo visual con capas de animación. La ficha de Commons identifica la imagen como un miembro Huarpe y la marca como dominio público.'
+};
+
+window.HuarprendizajeCallBackground=CALL_BACKGROUND_SOURCE;
+
+/* ========================================================================
+   27) FIN DEL MÓDULO DE MEJORAS
+   ======================================================================== */
+
+migrateState();
+
+</script>
+</body>
+</html>
