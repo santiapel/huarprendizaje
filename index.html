@@ -1,13 +1,11 @@
+```html
 <!DOCTYPE html>
 <html lang="es">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>Huarprendizaje</title>
-<meta name="description" content="Huarprendizaje es una plataforma para hacer
-Aprender a las nuevas generaciones sobre los 
-Huarpes con Información, preguntas y videojuegos
-Adaptados a esta generación.">
+<meta name="description" content="Huarprendizaje: aprendé sobre la cultura Huarpe a través de lecciones, retos y juegos.">
 <link rel="icon" type="image/png" href="https://i.ibb.co/fV7Qvcxd/Gemini-Generated-Image-w18861w18861w188-removebg-preview.png">
 <link rel="apple-touch-icon" href="https://i.ibb.co/fV7Qvcxd/Gemini-Generated-Image-w18861w18861w188-removebg-preview.png">
 <meta property="og:type" content="website">
@@ -25,11 +23,7 @@ Aprender a las nuevas generaciones sobre los
 Huarpes con Información, preguntas y videojuegos
 Adaptados a esta generación ">
 <meta name="twitter:image" content="https://i.ibb.co/Jhg3ZYj/Whats-App-Image-2026-09-04-at-4-26-50-PM-removebg-preview.png">
-<script src="https://cdn.tailwindcss.com">
-
-pruneOldInfiniteLessons(30);
-
-</script>
+<script src="https://cdn.tailwindcss.com"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
 <style>
@@ -251,6 +245,237 @@ pruneOldInfiniteLessons(30);
     15%{opacity:.7;}
     85%{opacity:.7;}
     to{transform:translate3d(50px,-20vh,0) rotate(230deg); opacity:0;}
+  }
+  .vc-glass-panel{
+    background:rgba(25,20,16,.62);
+    border:1px solid rgba(255,255,255,.14);
+    box-shadow:0 18px 55px rgba(0,0,0,.35);
+    backdrop-filter:blur(13px);
+    -webkit-backdrop-filter:blur(13px);
+  }
+  .vc-audio-meter{
+    display:flex;
+    align-items:flex-end;
+    justify-content:center;
+    gap:3px;
+    height:20px;
+    margin-top:8px;
+  }
+  .vc-audio-meter i{
+    display:block;
+    width:4px;
+    height:5px;
+    border-radius:4px;
+    background:#E3A73C;
+    opacity:.45;
+  }
+  .mara-speaking .vc-audio-meter i:nth-child(1){animation:meter .34s ease-in-out infinite alternate .02s;}
+  .mara-speaking .vc-audio-meter i:nth-child(2){animation:meter .25s ease-in-out infinite alternate .09s;}
+  .mara-speaking .vc-audio-meter i:nth-child(3){animation:meter .42s ease-in-out infinite alternate .04s;}
+  .mara-speaking .vc-audio-meter i:nth-child(4){animation:meter .29s ease-in-out infinite alternate .13s;}
+  .mara-speaking .vc-audio-meter i:nth-child(5){animation:meter .37s ease-in-out infinite alternate .07s;}
+  @keyframes meter{from{height:4px;opacity:.45;}to{height:19px;opacity:1;}}
+  .mara-mouth-single{transform-box:fill-box;transform-origin:center;}
+  .mara-speaking .mara-mouth-single{animation:mara-mouth-open .16s ease-in-out infinite alternate;}
+  @keyframes mara-mouth-open{from{transform:scaleY(.45);}to{transform:scaleY(1.55);}}
+
+  /* ================================================================
+     MEJORAS DE LECCIONES
+     ================================================================ */
+  .lesson-option{position:relative;overflow:hidden;}
+  .lesson-option::after{
+    content:'';
+    position:absolute;
+    inset:0;
+    background:linear-gradient(100deg,transparent,rgba(255,255,255,.18),transparent);
+    transform:translateX(-120%);
+    transition:transform .45s ease;
+    pointer-events:none;
+  }
+  .lesson-option:hover::after{transform:translateX(120%);}
+  .lesson-type-badge{
+    display:inline-flex;
+    align-items:center;
+    gap:5px;
+    width:max-content;
+    padding:5px 9px;
+    border-radius:999px;
+    background:rgba(76,122,63,.11);
+    color:var(--cactus-dark);
+    font-size:11px;
+    font-weight:900;
+    margin-bottom:10px;
+  }
+  .lesson-sort-item{cursor:grab;user-select:none;touch-action:none;}
+  .lesson-sort-item.dragging{opacity:.5;transform:scale(.98);}
+  .lesson-memory-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;}
+  .memory-card{min-height:76px;perspective:600px;}
+  .memory-card button{width:100%;height:100%;min-height:76px;}
+  .fill-input{
+    width:100%;
+    border:2px solid var(--sand-dark);
+    border-radius:16px;
+    padding:12px 14px;
+    background:white;
+    color:var(--ink);
+    font-weight:800;
+  }
+  .multi-check{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    width:100%;
+    text-align:left;
+  }
+  .multi-check input{width:19px;height:19px;accent-color:var(--cactus);}
+
+  /* ================================================================
+     MINIJUEGO: RENDER EFICIENTE Y GUANACO HACIA ADELANTE
+     ================================================================ */
+  #game-canvas{image-rendering:auto;touch-action:none;}
+  .game-hud-chip{backdrop-filter:blur(7px);-webkit-backdrop-filter:blur(7px);}
+  .game-sun-glow{
+    position:absolute;
+    width:150px;
+    height:150px;
+    right:-40px;
+    top:-40px;
+    border-radius:50%;
+    background:rgba(227,167,60,.25);
+    filter:blur(8px);
+    pointer-events:none;
+  }
+  .game-performance-note{
+    font-size:10px;
+    opacity:.65;
+    text-align:center;
+    margin-top:5px;
+  }
+
+
+  /* ================================================================
+     MASCOTA COMPAÑERA + MICROANIMACIONES
+     ================================================================ */
+  #companion-pet{position:fixed;right:12px;bottom:76px;z-index:45;width:58px;height:58px;border-radius:22px;background:linear-gradient(145deg,var(--gold),var(--clay));border:3px solid rgba(255,255,255,.85);box-shadow:0 12px 28px rgba(0,0,0,.2);display:flex;align-items:center;justify-content:center;font-size:32px;cursor:pointer;animation:pet-float 2.8s ease-in-out infinite;transition:transform .2s ease,filter .2s ease}
+  #companion-pet:hover{transform:scale(1.08) rotate(-3deg);filter:saturate(1.15)}
+  #companion-pet.speaking{animation:pet-talk .32s ease-in-out infinite alternate}
+  #companion-pet-bubble{position:fixed;right:16px;bottom:140px;z-index:46;max-width:220px;background:var(--cream);color:var(--ink);border:2px solid var(--sand-dark);border-radius:18px 18px 4px 18px;padding:9px 12px;font-size:11px;font-weight:800;box-shadow:0 10px 25px rgba(0,0,0,.16);opacity:0;transform:translateY(8px) scale(.96);pointer-events:none;transition:opacity .2s ease,transform .2s ease}
+  #companion-pet-bubble.show{opacity:1;transform:translateY(0) scale(1)}
+  @keyframes pet-float{0%,100%{transform:translateY(0) rotate(0)}50%{transform:translateY(-7px) rotate(2deg)}}
+  @keyframes pet-talk{from{transform:scale(1)}to{transform:scale(1.08) rotate(-2deg)}}
+  @keyframes lesson-pop{from{opacity:0;transform:translateY(12px) scale(.98)}to{opacity:1;transform:none}}
+  #lesson-body>*{animation:lesson-pop .28s ease both}
+  .ai-generated-title{background:linear-gradient(90deg,var(--clay-dark),var(--cactus-dark));-webkit-background-clip:text;background-clip:text;color:transparent}
+  .vc-user-speaking{animation:pet-talk .28s ease-in-out infinite alternate}
+  #app-root.dark-mode #companion-pet-bubble{background:#302820;color:var(--ink);border-color:#4A3D31}
+  #app-root.dark-mode #game-canvas{filter:brightness(.82) saturate(.85)}
+  #app-root.dark-mode .game-sun-glow{opacity:.55}
+
+
+  /* ================================================================
+     HUARPRENDIZAJE 5.0 — UI EDUCATIVA PROFESIONAL
+     ================================================================ */
+  :root{
+    --brand-blue:#1683F7;
+    --brand-blue-dark:#0D67CF;
+    --brand-blue-soft:#EAF4FF;
+    --ui-bg:#F7F9FC;
+    --ui-card:#FFFFFF;
+    --ui-text:#172033;
+    --ui-muted:#667085;
+    --ui-border:#E6EAF0;
+  }
+  .huarpe-logo{
+    font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","SF Pro Text","Helvetica Neue",Arial,sans-serif !important;
+    font-weight:800;
+    letter-spacing:-.055em;
+    color:var(--brand-blue) !important;
+    line-height:1;
+  }
+  .huarpe-logo small{
+    display:block;
+    font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","Helvetica Neue",Arial,sans-serif !important;
+    font-size:.32em;
+    letter-spacing:.02em;
+    font-weight:700;
+    color:#7A8699;
+    margin-top:7px;
+  }
+  #app-root{
+    background:var(--ui-bg);
+    box-shadow:0 0 45px rgba(24,42,70,.08);
+  }
+  #screen-app{
+    background:var(--ui-bg);
+  }
+  #screen-app > header{
+    background:rgba(255,255,255,.96) !important;
+    border-bottom:1px solid var(--ui-border) !important;
+    min-height:58px;
+  }
+  .professional-home{
+    background:var(--ui-bg) !important;
+  }
+  .home-hero{
+    background:linear-gradient(135deg,#EAF4FF 0%,#F7FBFF 58%,#FFFFFF 100%);
+    border:1px solid #DDEBFA;
+    border-radius:24px;
+    padding:20px;
+    box-shadow:0 10px 28px rgba(22,131,247,.08);
+  }
+  .home-welcome{
+    font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","SF Pro Text","Helvetica Neue",Arial,sans-serif !important;
+    font-size:28px;
+    font-weight:800;
+    letter-spacing:-.045em;
+    color:var(--brand-blue);
+  }
+  .section-title{
+    font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","SF Pro Text","Helvetica Neue",Arial,sans-serif !important;
+    font-weight:800;
+    letter-spacing:-.025em;
+    color:var(--ui-text);
+  }
+  .section-subtitle{color:var(--ui-muted);font-size:12px;font-weight:700}
+  .course-section{
+    background:#fff;
+    border:1px solid var(--ui-border);
+    border-radius:22px;
+    padding:14px;
+    box-shadow:0 6px 18px rgba(16,24,40,.04);
+  }
+  .course-section-head{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+  .course-section-icon{
+    width:40px;height:40px;border-radius:13px;display:flex;align-items:center;justify-content:center;
+    background:var(--brand-blue-soft);font-size:20px;flex:none;
+  }
+  .course-card{
+    position:relative;display:flex;align-items:center;gap:12px;width:100%;
+    padding:13px;border:1px solid var(--ui-border);border-radius:18px;background:#fff;
+    text-align:left;transition:transform .16s ease,box-shadow .16s ease,border-color .16s ease;
+  }
+  .course-card:active{transform:scale(.985)}
+  .course-card.unlocked:hover{transform:translateY(-1px);box-shadow:0 8px 20px rgba(16,24,40,.06);border-color:#C9DDF4}
+  .course-icon{width:46px;height:46px;border-radius:15px;background:#F2F6FA;display:flex;align-items:center;justify-content:center;font-size:24px;flex:none}
+  .course-card.completed .course-icon{background:#E9F8EF}
+  .course-card.locked{opacity:.58;filter:saturate(.55)}
+  .course-card-title{font-size:14px;font-weight:900;color:var(--ui-text)}
+  .course-card-meta{font-size:10px;font-weight:800;color:var(--ui-muted);margin-top:3px}
+  .course-status{margin-left:auto;width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:#F1F4F8;color:#8491A3;font-size:15px;flex:none}
+  .course-card.completed .course-status{background:#DFF5E7;color:#159447}
+  .course-card.current{border:2px solid #9DC9FA;box-shadow:0 7px 22px rgba(22,131,247,.12)}
+  .difficulty-pill{
+    display:inline-flex;align-items:center;gap:6px;padding:6px 9px;border-radius:999px;
+    background:#fff;border:1px solid #D9E6F4;color:#3A4A5F;font-size:10px;font-weight:900;
+  }
+  .history-card{
+    display:flex;align-items:center;gap:11px;background:#fff;border:1px solid var(--ui-border);
+    border-radius:17px;padding:12px;
+  }
+  .history-icon{width:38px;height:38px;border-radius:12px;background:#F1F5F9;display:flex;align-items:center;justify-content:center;font-size:18px}
+  .history-title{font-size:12px;font-weight:900;color:var(--ui-text)}
+  .history-meta{font-size:10px;font-weight:700;color:var(--ui-muted);margin-top:3px}
+  .h  to{transform:translate3d(50px,-20vh,0) rotate(230deg); opacity:0;}
   }
   .vc-glass-panel{
     background:rgba(25,20,16,.62);
